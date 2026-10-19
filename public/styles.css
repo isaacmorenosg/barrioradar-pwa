@@ -41,3 +41,20 @@
 .rating-replace-notice:not([hidden]) { background:#fff7e8; border:1px solid #e7be77; color:#63400a; border-radius:12px; padding:13px 15px; margin:14px 0 18px; }
 .rating-replace-notice strong { display:block; font-weight:800; margin-bottom:5px; }
 .rating-replace-notice p { margin:0; font-size:13px; line-height:1.55; }
+
+/* Acceso por enlace de correo: un único método, sin códigos opcionales ambiguos. */
+.auth-steps{list-style:none;margin:17px 0;padding:0;display:grid;gap:11px}
+.auth-steps li{display:flex;align-items:flex-start;gap:11px}
+.auth-steps li>span{width:29px;height:29px;flex:0 0 29px;border-radius:50%;display:grid;place-items:center;background:#e0f0e3;color:#1d6748;font-weight:800;font-size:13px}
+.auth-steps p{margin:3px 0 0;color:#637768;line-height:1.55;font-size:12px}
+.auth-steps strong{color:#183e2d}
+.auth-email-form{display:grid;gap:10px;margin-top:17px}
+.auth-email-form label{font-size:12px;font-weight:750;color:#244735}
+.auth-email-form input{width:100%;min-height:47px;border:1px solid #cbdcd0;border-radius:10px;padding:12px 13px;background:white;color:#19392b;font:inherit;font-size:15px}
+.auth-email-form .primary-button{width:100%;justify-content:center;min-height:47px}
+.auth-email-form[hidden],.auth-sent[hidden]{display:none!important}
+.auth-sent{border:1px solid #a9d5b8;background:#eff8ef;border-radius:13px;padding:16px;margin-top:16px}
+.auth-sent>strong{color:#1f7049;font-size:16px}
+.auth-sent p{font-size:12px;line-height:1.65;color:#3c694d;margin:9px 0}
+.auth-sent button{margin-top:6px;padding:11px 15px}
+.auth-status{font-size:12px;line-height:1.5;color:#426a51;margin-top:12px}

@@ -1,4 +1,4 @@
-const SHELL='barrioradar-comunidad-v14-busqueda-espana';
+const SHELL='barrioradar-pro-correo-verificado-v15';
 const ASSETS=['/','/index.html','/styles.css','/app.js','/config.js','/supabase-api.js','/manifest.webmanifest','/icons.svg','/icons/icon-192.png','/icons/icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(SHELL).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==SHELL).map(k=>caches.delete(k)))),self.clients.claim()])));

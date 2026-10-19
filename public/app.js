@@ -360,7 +360,7 @@ function renderComparePage(){
   root.querySelectorAll('[data-compare-open]').forEach(btn=>btn.addEventListener('click',()=>goToSnapshot(state.comparison[Number(btn.dataset.compareOpen)])));
   root.querySelectorAll('[data-compare-remove]').forEach(btn=>btn.addEventListener('click',()=>{state.comparison.splice(Number(btn.dataset.compareRemove),1);persist();renderComparePage();}));
 }
-function openModal(markup){EL('modalContent').innerHTML=`<div class="modal-body">${markup}</div>`;EL('modalRoot').classList.remove('hidden');document.body.style.overflow='hidden';EL('modalContent').querySelectorAll('[data-close]').forEach(btn=>btn.addEventListener('click',closeModal));}
+function openModal(markup){EL('modalContent').innerHTML=`<div class="modal-body">${markup}</div>`;const heading=EL('modalContent').querySelector('h2');if(heading)heading.id='modalTitle';EL('modalRoot').classList.remove('hidden');document.body.style.overflow='hidden';EL('modalContent').querySelectorAll('[data-close]').forEach(btn=>btn.addEventListener('click',closeModal));}
 function closeModal(){EL('modalRoot').classList.add('hidden');EL('modalContent').innerHTML='';document.body.style.overflow='';}
 const QUESTIONS=[
   ['day','Sensación al caminar de día','Poca tranquilidad','Mucha tranquilidad'],
@@ -377,41 +377,74 @@ async function updateAccountButton(){
     btn.title=user?'Sesion iniciada con correo verificado':'Iniciar sesion con correo';
   } catch { btn.textContent='Mi cuenta'; }
 }
-async function openAccount(){
+async function openAccount({fromRating=false}={}){
   if(!window.BarrioAPI?.configured){
-    toast('Esta version aun no esta conectada a Supabase.');return;
+    toast('Esta versión aún no está conectada a Supabase.');return;
   }
-  const user=await window.BarrioAPI.getCommunityUser();
+  let user;
+  try { user=await window.BarrioAPI.getCommunityUser(); }
+  catch(error){ toast(error.message||'No pudimos comprobar tu cuenta.');return; }
   if(user){
-    openModal(`<div class="modal-heading"><div><div class="modal-kicker">TU PARTICIPACION</div><h2>Cuenta verificada</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><p class="modal-description">Correo: ${escapeHtml(user.email)}. Tu correo no se muestra en el mapa ni al resto de participantes.</p><div class="modal-list"><div>${icon('shield')} Tus valoraciones se guardan en una zona aproximada y se publican solo en conjunto tras moderacion.</div></div><button class="secondary-button" id="logoutCommunity" style="width:100%">Cerrar sesion</button>`);
+    openModal(`<div class="modal-heading"><div><div class="modal-kicker">TU CUENTA</div><h2>Correo verificado</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><p class="modal-description">Has iniciado sesión como <strong>${escapeHtml(user.email)}</strong>. Tu correo no se muestra en el mapa.</p><div class="modal-list"><div>${icon('shield')} Tus valoraciones se publican solo cuando un moderador las aprueba.</div></div><div class="modal-footer"><button class="secondary-button" id="logoutCommunity">Cerrar sesión</button><button class="primary-button" id="accountDone">${fromRating?'Continuar con la valoración':'Volver al mapa'}</button></div>`);
+    EL('accountDone').addEventListener('click',()=>{closeModal();if(fromRating)openRating();});
     EL('logoutCommunity').addEventListener('click',async()=>{
-      try { await window.BarrioAPI.logoutCommunity();closeModal();await updateAccountButton();toast('Has cerrado la sesion.'); }
-      catch(error){toast(error.message||'No se pudo cerrar la sesion.');}
+      try { await window.BarrioAPI.logoutCommunity();closeModal();await updateAccountButton();toast('Has cerrado la sesión.'); }
+      catch(error){toast(error.message||'No se pudo cerrar la sesión.');}
     });
     return;
   }
-  openModal(`<div class="modal-heading"><div><div class="modal-kicker">CUENTA GRATUITA</div><h2>Verifica tu correo para opinar</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><p class="modal-description">Enviaremos un enlace a tu correo. No publicamos tu direccion ni la utilizamos como puntuacion. Para valorar un sector debes tener acceso a ese correo.</p><form id="emailLoginForm"><label for="loginEmail" style="display:block;font-size:12px;font-weight:700;margin-bottom:7px">Correo electronico</label><input id="loginEmail" type="email" name="email" autocomplete="email" inputmode="email" required maxlength="254" placeholder="tu@email.es" style="display:block;width:100%;border:1px solid #cbdcd0;border-radius:10px;padding:13px;margin-bottom:13px"><button type="submit" class="primary-button" style="width:100%" id="loginSend">Enviar enlace de acceso</button></form><p id="loginStatus" class="modal-caption" role="status">Al abrir el enlace desde este dispositivo, vuelve a BarrioRadar para continuar.</p><div style="border-top:1px solid #e5ede5;margin-top:19px;padding-top:14px"><label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px" for="emailCode">¿Tu correo incluye un codigo numerico?</label><div style="display:flex;gap:8px"><input id="emailCode" inputmode="numeric" pattern="[0-9]{6,8}" placeholder="Codigo de 6 digitos" style="min-width:0;width:100%;border:1px solid #cbdcd0;border-radius:9px;padding:10px"><button class="secondary-button" id="checkCode">Verificar</button></div></div><p class="modal-caption">El acceso usa Supabase Auth. Revisa la <a href="/privacidad.html" target="_blank" rel="noopener">informacion de privacidad</a>. No uses correos ajenos.</p>`);
+  openModal(`<div class="modal-heading"><div><div class="modal-kicker">ACCESO GRATUITO</div><h2>${fromRating?'Primero verifica tu correo':'Entra en BarrioRadar'}</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div>
+    <p class="modal-description">${fromRating?'Para poder puntuar un sector necesitamos comprobar que tienes acceso a un correo electrónico. Todavía no puedes rellenar la valoración.':'Verifica tu correo para poder compartir experiencias. Consultar el mapa no requiere iniciar sesión.'}</p>
+    <ol class="auth-steps" aria-label="Cómo acceder">
+      <li><span>1</span><p><strong>Introduce tu correo.</strong> Te enviaremos un enlace de acceso.</p></li>
+      <li><span>2</span><p><strong>Abre tu correo</strong> y pulsa «Entrar» en el mensaje de BarrioRadar.</p></li>
+      <li><span>3</span><p><strong>Vuelve a BarrioRadar.</strong> Al estar verificado, ya podrás valorar la zona.</p></li>
+    </ol>
+    <form id="emailLoginForm" class="auth-email-form">
+      <label for="loginEmail">Tu correo electrónico</label>
+      <input id="loginEmail" type="email" name="email" autocomplete="email" inputmode="email" required maxlength="254" placeholder="tu@correo.es">
+      <button type="submit" class="primary-button" id="loginSend">Enviarme el enlace por correo ${icon('arrow-right')}</button>
+    </form>
+    <div id="authSentState" class="auth-sent" hidden>
+      <strong>¡Revisa tu correo!</strong>
+      <p>Hemos solicitado un enlace para <strong id="authSentEmail"></strong>.</p>
+      <p>Busca el mensaje de BarrioRadar (también en Spam) y pulsa su enlace. No tienes que copiar códigos ni contraseñas.</p>
+      <button class="secondary-button" id="changeLoginEmail" type="button">Usar otro correo</button>
+    </div>
+    <p id="loginStatus" class="auth-status" role="status" aria-live="polite"></p>
+    <p class="modal-caption">Tu dirección no se publica. Consulta la <a href="/privacidad.html" target="_blank" rel="noopener">información de privacidad</a>. No utilices correos ajenos.</p>`);
   EL('emailLoginForm').addEventListener('submit',async e=>{
-    e.preventDefault();const send=EL('loginSend');send.disabled=true;
+    e.preventDefault();
+    const send=EL('loginSend'),status=EL('loginStatus');
+    send.disabled=true;send.textContent='Enviando enlace…';status.textContent='';
     const email=EL('loginEmail').value.trim();
-    try{await window.BarrioAPI.sendLoginEmail(email);EL('loginStatus').textContent='Revisa tu correo. Pulsa el enlace de acceso; luego vuelve a BarrioRadar.';}
-    catch(error){EL('loginStatus').textContent=error.message||'No se pudo enviar el enlace.';}
-    finally{send.disabled=false;}
+    try{
+      await window.BarrioAPI.sendLoginEmail(email);
+      EL('emailLoginForm').hidden=true;
+      EL('authSentEmail').textContent=email;
+      EL('authSentState').hidden=false;
+      status.textContent='En cuanto pulses el enlace recibido, podrás volver a BarrioRadar y opinar.';
+    }catch(error){
+      status.textContent=error.message||'No se pudo enviar el enlace. Inténtalo de nuevo.';
+    }finally{send.disabled=false;send.innerHTML=`Enviarme el enlace por correo ${icon('arrow-right')}`;}
   });
-  EL('checkCode').addEventListener('click',async()=>{
-    const btn=EL('checkCode');btn.disabled=true;
-    try {
-      const email=EL('loginEmail').value.trim();
-      await window.BarrioAPI.confirmEmailCode(email,EL('emailCode').value.trim());
-      closeModal();await updateAccountButton();toast('Cuenta verificada: ya puedes opinar.');
-    } catch(error){EL('loginStatus').textContent=error.message||'Codigo incorrecto.';}
-    finally{btn.disabled=false;}
+  EL('changeLoginEmail').addEventListener('click',()=>{
+    EL('authSentState').hidden=true;
+    EL('emailLoginForm').hidden=false;
+    EL('loginStatus').textContent='';
+    EL('loginEmail').focus();
   });
 }
 
-function openRating(){
+async function openRating(){
   if(PREVIEW_MODE){toast('Las muestras no aceptan votos. Abre el modo real.');return;}
   if(!state.selected){toast('Primero selecciona una zona');return;}
+  // No rating controls until Supabase confirms a verified user.
+  if(!window.BarrioAPI?.configured){toast('El acceso aún no está disponible.');return;}
+  let verifiedUser;
+  try{verifiedUser=await window.BarrioAPI.getCommunityUser();}
+  catch(error){toast(error.message||'No pudimos comprobar tu acceso.');return;}
+  if(!verifiedUser){await openAccount({fromRating:true});return;}
   const selected=state.selected;
   openModal(`<div class="modal-heading"><div><div class="modal-kicker">COMPARTE TU EXPERIENCIA</div><h2>¿Cómo se vive esta zona?</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><p class="modal-description">${sectorName(selected)} · ${escapeHtml(state.city)}. Valora únicamente lo que conozcas de primera mano. No se pedirán nombres ni descripciones de personas.</p><form id="ratingForm"><div id="existingReviewNotice" class="rating-replace-notice" role="status" hidden><strong>Ya has valorado esta zona</strong><p>Al volver a enviarla, sustituirás tu valoración y comentario anteriores. Solo se conserva una valoración por cuenta y zona, y la nueva pasará otra vez por moderación.</p></div>${QUESTIONS.map(([key,label,low,high])=>`<div class="slider-group"><div class="slider-group-top"><label for="range-${key}">${label}</label><output class="slider-value" id="value-${key}">3/5</output></div><input aria-label="${label}" id="range-${key}" class="rating-slider" name="${key}" type="range" min="1" max="5" step="1" value="3"><div class="slider-tips"><span>${low}</span><span>${high}</span></div></div>`).join('')}<div class="detail-section-title">¿Qué destacarías? <span style="font-weight:500;color:#94a79a">(opcional, máximo 4)</span></div><div class="tag-options">${TAGS.map(([key,label])=>`<label><input type="checkbox" name="tags" value="${key}">${label}</label>`).join('')}</div><div class="rating-comment-field"><label for="ratingComment">Cuenta tu experiencia <span>(opcional)</span></label><textarea id="ratingComment" name="comment" rows="4" maxlength="500" placeholder="¿Qué te gusta de esta zona o qué mejorarías? Cuéntalo sin identificar a otras personas."></textarea><div class="rating-comment-hint"><span>No incluyas nombres, direcciones concretas, datos privados ni acusaciones sobre personas. El mensaje se revisará antes de publicarse.</span><output id="ratingCommentCount" aria-live="polite">0 / 500</output></div></div><div class="modal-footer"><button type="button" class="secondary-button" data-close>Cerrar</button><button type="submit" class="primary-button" id="sendRating">Enviar valoración ${icon('arrow-right')}</button></div><p class="modal-caption">Las contribuciones pasan por moderación. Puedes valorar tantas zonas como quieras y actualizar cada valoración las veces que necesites (con una pausa de 2 minutos entre cambios). Solo se mantiene una por cuenta y zona, y cada cambio requiere moderación. Solo aceptamos cuentas con correo verificado. Evita compartir datos personales.</p></form>`);
   const form=EL('ratingForm');
@@ -456,7 +489,7 @@ function openRating(){
       await window.BarrioAPI.sendReview({...values,lat:selected.lat,lng:selected.lng,cellId:selected.id,tags,comment});
       openModal(`<div class="modal-heading"><div><div class="modal-kicker">APORTACIÓN RECIBIDA</div><h2>Gracias por compartir.</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><div class="success-card"><div class="success-icon">${icon('check')}</div><h3>Tu opinión está en revisión</h3><p>Se mostrará en el mapa en cuanto un moderador la apruebe, aunque sea la primera opinión del sector. Se indicará que es una muestra muy limitada.</p><button class="primary-button" id="closeSuccess" style="width:100%">Volver al mapa</button></div>`);
       EL('closeSuccess').addEventListener('click',closeModal);
-    }catch(error){if(error.code==='LOGIN_REQUIRED'){await openAccount();}else{toast(error.message||'Error de conexion');}btn.disabled=false;btn.innerHTML=`Enviar valoración ${icon('arrow-right')}`;}
+    }catch(error){if(error.code==='LOGIN_REQUIRED'){await openAccount({fromRating:true});}else{toast(error.message||'Error de conexion');}btn.disabled=false;btn.innerHTML=`Enviar valoración ${icon('arrow-right')}`;}
     finally {
       // A cancelled confirmation must leave the form usable.
       if (btn.isConnected) {
@@ -509,7 +542,7 @@ function start(){
   }
   state.selected=PREVIEW_MODE?previewRecords()[0]:cellAt(state.center.lat,state.center.lng);
   bindUI();initMap();renderDetails();renderCounters();refreshRealData();updateAccountButton();
-  if(window.BarrioAPI?.configured)window.BarrioAPI.onCommunityAuthChange(updateAccountButton);
+  if(window.BarrioAPI?.configured)window.BarrioAPI.onCommunityAuthChange(async()=>{await updateAccountButton();if(EL('emailLoginForm')&&!EL('modalRoot').classList.contains('hidden')){try{const u=await window.BarrioAPI.getCommunityUser();if(u){closeModal();toast('Correo verificado. Ya puedes opinar.');}}catch{}}});
 }
 document.addEventListener('DOMContentLoaded',start);
 })();

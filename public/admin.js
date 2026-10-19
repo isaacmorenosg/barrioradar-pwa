@@ -5,8 +5,9 @@ async function loadQueue() {
   const api = window.BarrioAPI;
   if (!api?.configured) { $('message').textContent = 'Supabase todavia no esta configurado.'; return; }
   const user = await api.currentAdmin();
-  if (!user) { $('message').textContent = 'Accede con tu cuenta de moderador.'; return; }
-  $('adminAccount').textContent = `Sesion: ${user.email || 'Cuenta'} | UUID: ${user.id}. Este UUID debe estar autorizado en br_moderators.`;
+  if (!user) { $('login').hidden=false; $('message').textContent = 'Introduce tu correo. Recibirás un enlace, no un código.'; return; }
+  $('adminAccount').textContent = `Sesión iniciada con ${user.email || 'tu correo'}. Los permisos de moderación se comprueban automáticamente.`;
+  $('login').hidden=true;
   try {
     const rows = await api.adminQueue();
     $('message').textContent = `${rows.length} aportaciones pendientes`;
@@ -44,20 +45,9 @@ $('login').addEventListener('submit', async e => {
   try {
     const email = $('email').value.trim();
     await window.BarrioAPI.sendLoginEmail(email, "/admin.html");
-    $('codeEmail').value = email;
-    $('message').textContent = 'Hemos solicitado un enlace de acceso. Abre el correo: el enlace te devolvera directamente al panel de moderacion. Si recibes un codigo, introducelo abajo.';
+    $('message').textContent = 'Te hemos enviado un enlace por correo. Ábrelo para regresar al panel. No necesitas ningún código.';
   } catch (err) { $('message').textContent = err.message || 'No se pudo solicitar acceso.'; }
   finally { btn.disabled = false; }
-});
-$('codeLogin').addEventListener('submit', async e => {
-  e.preventDefault();
-  const btn=e.target.querySelector('button'); btn.disabled=true;
-  try {
-    await window.BarrioAPI.confirmEmailCode($('codeEmail').value.trim(), $('code').value.trim());
-    $('code').value='';
-    await loadQueue();
-  } catch (err) { $('message').textContent=err.message || 'Codigo incorrecto.'; }
-  finally { btn.disabled=false; }
 });
 if (window.BarrioAPI?.configured) window.BarrioAPI.onCommunityAuthChange(loadQueue);
 loadQueue();
