@@ -110,36 +110,154 @@
     return () => data.subscription.unsubscribe();
   }
 
-  async function searchPlaces(query) {
-    const value = String(query || '').trim().slice(0, 110);
-    if (value.length < 2) throw new Error('Introduce al menos dos caracteres.');
-    const key = value.toLocaleLowerCase('es');
-    const cached = temporaryCache.get(key);
-    if (cached && Date.now() - cached.at < 7 * 86400000) return cached.places;
-    if (Date.now() - lastGeocode < 1200) throw new Error('Espera unos segundos antes de buscar de nuevo.');
-    lastGeocode = Date.now();
-    const url = new URL('https://photon.komoot.io/api/');
-    url.searchParams.set('q', value);
-    url.searchParams.set('limit', '5');
-    url.searchParams.set('lang', 'es');
-    url.searchParams.set('bbox', '-18.5,27,5,44.5');
+  // Geocoding nationwide: CartoCiudad (IGN/CNIG, municipios y entidades de población)
+  // with Photon/OpenStreetMap as a fallback and a complementary source of hamlets.
+  // Search requests happen only on submit, never on every keystroke.
+  const GEOCODING_AREA = {west:-18.5, south:27, east:5, north:44.5};
+  const CARTOCIUDAD_BASE = 'https://www.cartociudad.es/geocoder/api/geocoder/';
+  const PHOTON_BASE = 'https://photon.komoot.io/api/';
+  const LOCALITY_TYPES = new Set(['municipio','poblacion','provincia','comunidad autonoma']);
+  const OSM_PLACE_TYPES = new Set([
+    'city','town','village','hamlet','isolated_dwelling','locality',
+    'suburb','neighbourhood','quarter','municipality','borough'
+  ]);
+  function tidy(value) { return String(value ?? '').trim().replace(/\s+/g,' '); }
+  function normalizePlaceName(value) {
+    return tidy(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es');
+  }
+  function validSpainCoords(lat,lng) {
+    return lat !== null && lng !== null && lat !== undefined && lng !== undefined &&
+      lat !== '' && lng !== '' && Number.isFinite(Number(lat)) && Number.isFinite(Number(lng)) &&
+      Number(lat)>=GEOCODING_AREA.south && Number(lat)<=GEOCODING_AREA.north &&
+      Number(lng)>=GEOCODING_AREA.west && Number(lng)<=GEOCODING_AREA.east;
+  }
+  async function geoFetch(url, maxWait=6500) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 7000);
-    let result;
+    const timeout = setTimeout(() => controller.abort(), maxWait);
     try {
-      const response = await fetch(url, { signal: controller.signal, credentials: 'omit' });
-      if (!response.ok) throw new Error('Busqueda externa no disponible. Prueba con una ciudad sugerida.');
-      result = await response.json();
+      const response = await fetch(url, {signal:controller.signal, credentials:'omit', mode:'cors'});
+      if (!response.ok) throw new Error(`Geocoder HTTP ${response.status}`);
+      return await response.json();
     } finally { clearTimeout(timeout); }
-    const places = (result.features || []).filter(f => String(f.properties?.countrycode || '').toUpperCase() === 'ES')
-      .slice(0, 4).map(f => ({
-        lat: Number(f.geometry.coordinates[1]), lng: Number(f.geometry.coordinates[0]),
-        name: [f.properties?.name, f.properties?.city || f.properties?.county]
-          .filter((x, i, arr) => x && arr.indexOf(x) === i).join(', ')
-      }));
-    if (temporaryCache.size > 50) temporaryCache.clear();
-    temporaryCache.set(key, { places, at: Date.now() });
+  }
+  function placeLabel(parts) {
+    const unique=[];
+    for (const part of parts) {
+      const text=tidy(part);
+      if (text && !unique.join(', ').split(',').some(item=>normalizePlaceName(item)===normalizePlaceName(text))) unique.push(text);
+    }
+    return unique.join(', ');
+  }
+  function normalizeCartoCandidates(raw) {
+    const candidates=Array.isArray(raw)?raw:(raw?.candidates||raw?.results||[]);
+    if(!Array.isArray(candidates))return [];
+    return candidates.filter(p=>LOCALITY_TYPES.has(normalizePlaceName(p?.type)))
+      .filter(p=>p?.id!=null && tidy(p.address||p.poblacion||p.muni))
+      .map(p=>{
+        const kind=normalizePlaceName(p.type), address=tidy(p.address||p.poblacion||p.muni);
+        const localName=address.split(',')[0].trim();
+        const province=tidy(p.province);
+        const name=placeLabel([address,kind==='poblacion'?p.muni:'',province]);
+        const positioned=validSpainCoords(p.lat,p.lng);
+        return {name,localName,province,
+          lat:positioned?Number(p.lat):null,lng:positioned?Number(p.lng):null,
+          source:'cartociudad',cartoId:String(p.id),cartoType:String(p.type)};
+      });
+  }
+  function normalizePhotonFeatures(raw) {
+    const features=Array.isArray(raw?.features)?raw.features:[];
+    return features.filter(f=>{
+      const p=f?.properties||{};
+      return String(p.countrycode||'').toUpperCase()==='ES' &&
+        OSM_PLACE_TYPES.has(String(p.osm_value||'').toLowerCase()) &&
+        Array.isArray(f.geometry?.coordinates) &&
+        validSpainCoords(f.geometry.coordinates[1],f.geometry.coordinates[0]);
+    }).map(f=>{
+      const p=f.properties, province=tidy(p.county||p.state||'');
+      const localName=tidy(p.name);
+      const name=placeLabel([localName,p.city&&normalizePlaceName(p.city)!==normalizePlaceName(localName)?p.city:'',province]);
+      return {name,localName,province,lat:Number(f.geometry.coordinates[1]),
+        lng:Number(f.geometry.coordinates[0]),source:'photon'};
+    }).filter(p=>p.localName);
+  }
+  function rankPlace(p,term) {
+    const search=normalizePlaceName(term).split(',')[0].trim();
+    const name=normalizePlaceName(p.localName);
+    return name===search?0:name.startsWith(search)?1:name.includes(search)?2:3;
+  }
+  function mergePlaces(groups,term) {
+    const seen=new Map();
+    for(const p of groups.flat()) {
+      if(!p.name)continue;
+      const key=normalizePlaceName(p.localName)+'|'+normalizePlaceName(p.province);
+      const previous=seen.get(key);
+      if(!previous) {seen.set(key,p);continue;}
+      // Prefer official names and locations. Keep OSM coordinates if the
+      // official candidate needs a second request that later fails.
+      if(p.source==='cartociudad' && previous.source!=='cartociudad') {
+        seen.set(key,{...p,fallbackLat:previous.lat,fallbackLng:previous.lng});
+      } else if(previous.source==='cartociudad' && p.source==='photon' &&
+        validSpainCoords(p.lat,p.lng) && !validSpainCoords(previous.lat,previous.lng)) {
+        previous.fallbackLat=p.lat;previous.fallbackLng=p.lng;
+      }
+    }
+    return [...seen.values()].sort((a,b)=>rankPlace(a,term)-rankPlace(b,term)||
+      a.name.localeCompare(b.name,'es')).slice(0,12);
+  }
+  async function searchCartoCiudad(value) {
+    const url=new URL('candidates',CARTOCIUDAD_BASE);
+    url.searchParams.set('q',value);
+    url.searchParams.set('countrycodes','es');
+    url.searchParams.set('limit','24');
+    url.searchParams.set('no_process','callejero,carretera,portal,toponimo,ngbe,expendeduria,punto_recarga_electrica');
+    return normalizeCartoCandidates(await geoFetch(url,6000));
+  }
+  async function searchPhoton(value) {
+    const url=new URL(PHOTON_BASE);
+    url.searchParams.set('q',value);
+    url.searchParams.set('lang','es');
+    url.searchParams.set('limit','30');
+    url.searchParams.set('countrycode','ES');
+    url.searchParams.set('bbox','-18.5,27,5,44.5');
+    return normalizePhotonFeatures(await geoFetch(url,7000));
+  }
+  async function searchPlaces(query) {
+    const value=tidy(query).slice(0,110);
+    if(value.length<2)throw new Error('Introduce al menos dos caracteres.');
+    const key=normalizePlaceName(value);
+    const cached=temporaryCache.get(key);
+    if(cached && Date.now()-cached.at<7*86400000)return cached.places;
+    if(Date.now()-lastGeocode<1200)throw new Error('Espera unos segundos antes de buscar de nuevo.');
+    lastGeocode=Date.now();
+    const answers=await Promise.allSettled([searchCartoCiudad(value),searchPhoton(value)]);
+    const groups=answers.map(a=>a.status==='fulfilled'?a.value:[]);
+    const places=mergePlaces(groups,value);
+    if(answers.every(a=>a.status==='rejected')) {
+      throw new Error('Los servicios de búsqueda no responden. Reinténtalo dentro de unos instantes.');
+    }
+    if(temporaryCache.size>50)temporaryCache.clear();
+    temporaryCache.set(key,{places,at:Date.now()});
     return places;
+  }
+  async function resolvePlace(place) {
+    if(!place || typeof place.name!=='string')throw new Error('Selecciona una localidad válida.');
+    if(place.source==='cartociudad' && place.cartoId && place.cartoType) {
+      const url=new URL('find',CARTOCIUDAD_BASE);
+      url.searchParams.set('id',place.cartoId);
+      url.searchParams.set('type',place.cartoType);
+      try {
+        const raw=await geoFetch(url,6500);
+        const item=Array.isArray(raw)?raw[0]:raw;
+        if(validSpainCoords(item?.lat,item?.lng))return {...place,lat:Number(item.lat),lng:Number(item.lng)};
+        // Some geocoder responses supply the geometry only as a WKT point.
+        const wkt=/^POINT\s*\(\s*(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s*\)$/i.exec(item?.geom||'');
+        if(wkt&&validSpainCoords(wkt[2],wkt[1]))return {...place,lat:Number(wkt[2]),lng:Number(wkt[1])};
+      } catch { /* fall back to a previously validated coordinate */ }
+    }
+    if(validSpainCoords(place.lat,place.lng))return place;
+    if(validSpainCoords(place.fallbackLat,place.fallbackLng))
+      return {...place,lat:Number(place.fallbackLat),lng:Number(place.fallbackLng)};
+    throw new Error('No se pudo obtener la ubicación de esta localidad. Prueba otro resultado.');
   }
 
   async function currentAdmin() {
@@ -159,7 +277,7 @@
   }
   async function logoutAdmin() { await logoutCommunity(); }
 
-  window.BarrioAPI = Object.freeze({ configured, getRatings, sendReview, hasMyReview, searchPlaces,
+  window.BarrioAPI = Object.freeze({ configured, getRatings, sendReview, hasMyReview, searchPlaces, resolvePlace,
     getCommunityUser, sendLoginEmail, confirmEmailCode, logoutCommunity, onCommunityAuthChange,
     currentAdmin, adminQueue, moderate, logoutAdmin });
 }());

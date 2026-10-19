@@ -302,21 +302,32 @@ async function refreshRealData(){
 function escapeHtml(str){return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 async function searchPlace(term){
   const query=term.trim();if(query.length<2){toast('Introduce al menos dos caracteres');return;}
-  const found=PRESETS[clean(query.replace(/,.*$/,''))];
+  // Quick city buttons use presets, but typed searches cover ALL Spain.
+  const found=PRESETS[clean(query)];
   if(found){chooseLocation(found);return;}
   EL('mapLoader').hidden=false;
   EL('searchButton').disabled=true;
   try{
     const places=await window.BarrioAPI.searchPlaces(query);
-    if(!places?.length){toast('No se ha encontrado esta zona en España');return;}
-    if(places.length===1){chooseLocation(places[0]);return;}
+    if(!places?.length){toast('No hay coincidencias. Prueba con el nombre completo o añade la provincia.');return;}
+    if(places.length===1){chooseLocation(await window.BarrioAPI.resolvePlace(places[0]));return;}
     openPlaceResults(places);
-  }catch(e){toast(e.message||'Error buscando ciudad');}
+  }catch(e){toast(e.message||'Error buscando la localidad');}
   finally{EL('mapLoader').hidden=true;EL('searchButton').disabled=false;}
 }
 function openPlaceResults(places){
-  openModal(`<div class="modal-heading"><div><div class="modal-kicker">RESULTADOS DE BÚSQUEDA</div><h2>¿Qué lugar buscas?</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><p class="modal-description">Hemos encontrado varios lugares que coinciden con tu búsqueda.</p><div class="modal-list" id="placeResultList">${places.map((p,i)=>`<button class="secondary-button" data-result="${i}" style="justify-content:flex-start;padding:12px">${icon('map-pin')} ${escapeHtml(p.name||'Lugar')} ${icon('arrow-right')}</button>`).join('')}</div>`);
-  EL('placeResultList').querySelectorAll('[data-result]').forEach(btn=>btn.addEventListener('click',()=>{const place=places[Number(btn.dataset.result)];closeModal();chooseLocation(place);}));
+  openModal(`<div class="modal-heading"><div><div class="modal-kicker">MUNICIPIOS Y LOCALIDADES DE ESPAÑA</div><h2>¿Qué lugar buscas?</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><p class="modal-description">Selecciona el pueblo o ciudad correctos. Mostramos también su municipio o provincia para evitar confusiones.</p><div class="modal-list" id="placeResultList">${places.map((p,i)=>`<button type="button" class="secondary-button" data-result="${i}" style="justify-content:flex-start;padding:12px">${icon('map-pin')} ${escapeHtml(p.name||'Lugar')} ${icon('arrow-right')}</button>`).join('')}</div>`);
+  EL('placeResultList').querySelectorAll('[data-result]').forEach(btn=>btn.addEventListener('click',async()=>{
+    if(EL('mapLoader').hidden===false)return;
+    const place=places[Number(btn.dataset.result)];
+    EL('mapLoader').hidden=false;
+    EL('mapLoader').textContent='Localizando pueblo o ciudad…';
+    try {
+      const position=await window.BarrioAPI.resolvePlace(place);
+      closeModal();chooseLocation(position);
+    } catch(e) {toast(e.message||'No se pudo localizar esta población');}
+    finally {EL('mapLoader').hidden=true;EL('mapLoader').textContent='Buscando zona…';}
+  }));
 }
 function changeView(view){
   state.view=view;

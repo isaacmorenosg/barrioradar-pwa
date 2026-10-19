@@ -24,7 +24,7 @@ function makeApi({verified=true, present=false, malformed=false}={}) {
  return {API:context.window.BarrioAPI,calls};
 }
 async function main(){
- test('PWA cache version bumped',()=>assert.match(sw,/v13-huelva-sync/));
+ test('PWA cache version bumped',()=>assert.match(sw,/v14-busqueda-espana/));
  test('New sector form describes unlimited reviews',()=>assert.match(app,/Puedes valorar tantas zonas como quieras/));
  test('Existing sector message informs about replacing previous',()=>assert.match(app,/Ya has valorado esta zona/));
  test('Existing sector message remains hidden initially',()=>assert.match(app,/id="existingReviewNotice"[^>]+hidden/));

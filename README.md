@@ -59,3 +59,15 @@ La privacidad y las condiciones del servicio deben recibir revisión jurídica a
 ## Corrección de la ciudad inicial (v13)
 
 El HTML, el estado inicial y las etiquetas del mapa arrancan todos en Huelva. Un sincronizador central actualiza el título, la navegación y la ubicación visible al inicio y al cambiar de ciudad. La nota principal de la ficha representa el indicador de día o noche seleccionado, no el promedio global de las cuatro métricas. Se renueva la caché PWA para desplegar la corrección.
+
+## Buscador nacional (v14)
+
+La caja de búsqueda admite **municipios, ciudades, pueblos y entidades de población de toda España**, no solamente la lista de accesos rápidos. Consulta por nombre el servicio de geocodificación oficial [CartoCiudad (IGN/CNIG)](https://www.cartociudad.es/web/portal/directorio-de-servicios/geoprocesamiento), que incluye entidades poblacionales, y [Photon/OpenStreetMap](https://github.com/komoot/photon) como fuente complementaria o alternativa.
+
+- Se buscan un máximo de 24 candidatos oficiales y 30 referencias OSM, limitadas al territorio español, priorizando coincidencias por nombre y mostrando el municipio y/o la provincia.
+- Los municipios y poblaciones de CartoCiudad se geolocalizan por identificador al elegirlos; no se inventan coordenadas si el servicio no responde.
+- Si uno de los servicios no está disponible se conservan los resultados del otro. Peticiones solo al enviar la búsqueda, con límite de frecuencia, caché temporal y tiempo máximo de respuesta.
+- Los accesos rápidos a las capitales se mantienen como atajo, sin limitar la búsqueda libre.
+- La cobertura de pedanías y barrios depende de los datos de origen; la app no afirma que todas las entidades existentes estén indexadas.
+
+Las fuentes de los lugares proceden de IGN/CNIG (CartoCiudad) y de OpenStreetMap/Photon. El mapa base sigue siendo © OpenStreetMap.
