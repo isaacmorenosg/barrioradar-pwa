@@ -9,6 +9,12 @@ BarrioRadar muestra **percepciones subjetivas de personas con correo verificado*
 - Versión de muestra: `/?muestras=1` (opiniones **ficticias**, sin mezclarse con los datos reales).
 - Datos y autenticación: Supabase Postgres/Auth. SMTP de autenticación: Brevo, gestionado por Supabase Auth.
 
+## Sectores del mapa (revisión 2)
+
+Los hexágonos de selección tienen **200 m de radio en la proyección Web Mercator** (antes 400 m); cada sector ocupa una cuarta parte de la superficie anterior. El mapa abre con zoom 14 para poder seleccionarlos cómodamente. Se conservan las opiniones previas trasladando cada sector histórico `(q,r)` a `(2q,2r)`, con el mismo centro geográfico y la misma identidad del autor. No se multiplican votos.
+
+La migración SQL en `supabase/migrations/20261019_smaller_sectors.sql` ajusta las funciones de geolocalización y los identificadores de los sectores. Durante la transición acepta peticiones de clientes con la cuadrícula antigua, que se normalizan al tamaño nuevo. El frontend consulta su valoración previa con `br_my_sector_review_v2`; el punto de entrada anterior sigue disponible para clientes PWA aún sin actualizar. Las guardadas y comparaciones en `localStorage` se convierten automáticamente una sola vez en el navegador.
+
 ## Cómo funcionan las valoraciones
 
 1. El usuario inicia sesión con un correo confirmado.

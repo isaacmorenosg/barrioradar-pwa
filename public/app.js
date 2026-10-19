@@ -1,7 +1,7 @@
 /* BarrioRadar: datos reales; muestra visual segregada mediante ?muestras=1 */
 (() => {
 'use strict';
-const R=6378137, TAU=Math.PI*2, WORLD=TAU*R, HEX=400, SQRT3=Math.sqrt(3);
+const R=6378137, TAU=Math.PI*2, WORLD=TAU*R, HEX=200, SQRT3=Math.sqrt(3);
 const PRESETS={
   'sevilla':{name:'Sevilla',lat:37.3891,lng:-5.9845},
   'huelva':{name:'Huelva',lat:37.2614,lng:-6.9447},
@@ -80,7 +80,26 @@ function previewRecords(){
     .filter(p=>{if(seen.has(p.id))return false;seen.add(p.id);return true;});
 }
 
-const state={city:'Huelva',center:{lat:37.2614,lng:-6.9447},zoom:PREVIEW_MODE?14:13,mode:'night',realCells:[],selected:null,saved:safeRead('br_saved_v2',[]).filter(i=>!i.demo).map(i=>({...i,snapshot:null})),comparison:safeRead('br_compare_v2',[]).filter(i=>!i.demo).map(i=>({...i,snapshot:null})),view:'explorar',deferredInstall:null};
+// Migración local de sectores guardados, al pasar de radio 400 a 200 (proyección web).
+// Los centros antiguos pasan al sector (2*q, 2*r), sin perder la ubicación.
+function migrateSavedSectors(){
+  try{
+    if(localStorage.getItem('br_sector_grid_revision')==='200')return;
+    for(const key of ['br_saved_v2','br_compare_v2']){
+      const existing=safeRead(key,[]);
+      if(!Array.isArray(existing))continue;
+      const updated=existing.map(item=>{
+        if(!item||!Number.isInteger(item.q)||!Number.isInteger(item.r))return item;
+        return {...item,...cell(2*item.q,2*item.r),snapshot:null};
+      });
+      saveStore(key,updated);
+    }
+    localStorage.setItem('br_sector_grid_revision','200');
+  }catch{}
+}
+migrateSavedSectors();
+
+const state={city:'Huelva',center:{lat:37.2614,lng:-6.9447},zoom:14,mode:'night',realCells:[],selected:null,saved:safeRead('br_saved_v2',[]).filter(i=>!i.demo).map(i=>({...i,snapshot:null})),comparison:safeRead('br_compare_v2',[]).filter(i=>!i.demo).map(i=>({...i,snapshot:null})),view:'explorar',deferredInstall:null};
 const map={viewport:null,tiles:null,overlay:null,w:0,h:0,drag:null,readSeq:0};
 let toastTimer=0;
 function toast(message){const el=EL('toast');el.textContent=message;el.classList.add('shown');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('shown'),3300);}
@@ -217,7 +236,7 @@ function renderDetails(){
   const root=EL('detailsContent');
   const c=state.selected,record=selectedRecord();
   if(!c){root.innerHTML=`<div class="details-topline"><span class="detail-eyebrow">EXPLORA SIN PRISA</span>${icon('map-pin')}</div><div class="empty-details"><div class="empty-visual"></div><h3>Elige una zona<br>del mapa</h3><p>Pulsa cualquier punto del mapa para ver las opiniones existentes o añadir la tuya.</p><button class="primary-button" id="detailsStart">${icon('compass')} Explorar el mapa</button></div>`;EL('detailsStart').addEventListener('click',()=>map.viewport.focus());return;}
-  if(!record){root.innerHTML=`<div class="details-topline"><span class="detail-eyebrow">${sectorName(c)}</span><span class="detail-eyebrow">SIN DATOS</span></div><div class="detail-head"><h3>Esta zona espera voces</h3><p>${escapeHtml(displayedCity())} · cuadrícula aproximada</p></div><div class="empty-details"><div class="empty-visual"></div><h3>Aún no hay opiniones aprobadas</h3><p>La primera valoración aprobada aparecerá aquí. Una opinión aislada no representa al barrio ni permite sacar conclusiones de seguridad.</p></div><div class="detail-actions"><button class="primary-button" id="detailRate">${icon('message')} Compartir mi experiencia</button><button class="secondary-button" id="detailSave">${icon('bookmark')} ${selectedIsSaved()?'Quitar de guardadas':'Guardar esta zona'}</button></div>`;bindDetails();return;}
+  if(!record){root.innerHTML=`<div class="details-topline"><span class="detail-eyebrow">${sectorName(c)}</span><span class="detail-eyebrow">SIN DATOS</span></div><div class="detail-head"><h3>Esta zona espera voces</h3><p>${escapeHtml(displayedCity())} · sector reducido · cuadrícula aproximada</p></div><div class="empty-details"><div class="empty-visual"></div><h3>Aún no hay opiniones aprobadas</h3><p>La primera valoración aprobada aparecerá aquí. Una opinión aislada no representa al barrio ni permite sacar conclusiones de seguridad.</p></div><div class="detail-actions"><button class="primary-button" id="detailRate">${icon('message')} Compartir mi experiencia</button><button class="secondary-button" id="detailSave">${icon('bookmark')} ${selectedIsSaved()?'Quitar de guardadas':'Guardar esta zona'}</button></div>`;bindDetails();return;}
   const score=currentScore(record),tone=scoreColor(score),confidence=record.count===1?'Solo 1 opinión: muestra muy limitada':record.count<5?'Muy pocas opiniones: muestra limitada':record.count>=25?'Más aportaciones':record.count>=10?'Muestra moderada':'Muestra pequeña';
   const ring=((score-1)/4*100).toFixed(1)+'%';
   const metric=(label,value)=>`<div class="meter-row"><div class="meter-label"><span>${label}</span><strong>${value.toFixed(1)} / 5</strong></div><div class="meter-track"><div class="meter-fill" style="width:${((value-1)/4*100).toFixed(1)}%"></div></div></div>`;
@@ -248,7 +267,7 @@ function toggleCompare(){
   else{state.comparison.push(item);toast(state.comparison.length===2?'¡Dos zonas listas para comparar!':'Primera zona añadida a la comparación');}
   persist();renderDetails();renderComparePage();
 }
-function chooseLocation(place,zoom=13){
+function chooseLocation(place,zoom=14){
   state.city=place.name;state.center={lat:Number(place.lat),lng:Number(place.lng)};state.zoom=zoom;
   state.selected=cellAt(state.center.lat,state.center.lng);state.realCells=[];
   EL('crumbCity').textContent=state.city;EL('headingCity').textContent='/ '+state.city;EL('mapCityLabel').textContent=state.city+', España';

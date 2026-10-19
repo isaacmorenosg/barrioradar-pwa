@@ -73,7 +73,7 @@
       err.code = 'LOGIN_REQUIRED';
       throw err;
     }
-    const { data, error } = await getClient().rpc('br_my_sector_review', {p_cell_id: String(cellId || '')});
+    const { data, error } = await getClient().rpc('br_my_sector_review_v2', {p_cell_id: String(cellId || '')});
     throwIf(error);
     if (typeof data?.exists !== 'boolean') throw new Error('No se pudo comprobar tu valoración anterior. Inténtalo de nuevo.');
     return data.exists;

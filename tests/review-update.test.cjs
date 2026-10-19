@@ -24,7 +24,7 @@ function makeApi({verified=true, present=false, malformed=false}={}) {
  return {API:context.window.BarrioAPI,calls};
 }
 async function main(){
- test('PWA cache version bumped',()=>assert.match(sw,/v11-edicion-confirmada/));
+ test('PWA cache version bumped',()=>assert.match(sw,/v12-sectores-reducidos/));
  test('New sector form describes unlimited reviews',()=>assert.match(app,/Puedes valorar tantas zonas como quieras/));
  test('Existing sector message informs about replacing previous',()=>assert.match(app,/Ya has valorado esta zona/));
  test('Existing sector message remains hidden initially',()=>assert.match(app,/id="existingReviewNotice"[^>]+hidden/));
@@ -36,7 +36,7 @@ async function main(){
  let x=makeApi({present:true});
  assert.equal(await x.API.hasMyReview('-4845:7459'),true);
  assert.equal(x.calls.length,1);
- assert.equal(x.calls[0][0],'br_my_sector_review');
+ assert.equal(x.calls[0][0],'br_my_sector_review_v2');
  assert.equal(x.calls[0][1].p_cell_id,'-4845:7459');
  console.log('PASS Authenticated existing review returns true');passed++;
  x=makeApi({present:false});assert.equal(await x.API.hasMyReview('-4845:7459'),false); console.log('PASS Authenticated new review returns false');passed++;
