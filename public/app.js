@@ -108,6 +108,12 @@ function scoreColor(value){if(value>=3.7)return {fill:'#7fc99b',stroke:'#4eab7a'
 function currentScore(item){return Number(item[state.mode]||0);}
 function selectedRecord(){return activeCells().find(c=>c.id===state.selected?.id)||null;}
 function displayedCity(){return state.city.replace(/, España$/i,'');}
+function syncCityLabels(){
+  const city=displayedCity();
+  EL('crumbCity').textContent=city;
+  EL('headingCity').textContent='/ '+city;
+  EL('mapCityLabel').textContent=city+', España';
+}
 function drawBackground(){map.viewport.style.backgroundPosition=`${Math.round(state.center.lng*11)%200}px ${Math.round(state.center.lat*11)%200}px`;}
 function mapBounds(){const cp=toPx(state.center.lat,state.center.lng,state.zoom),padding=25;const sw=pxToLL(cp.x-map.w/2-padding,cp.y+map.h/2+padding,state.zoom),ne=pxToLL(cp.x+map.w/2+padding,cp.y-map.h/2-padding,state.zoom);return {west:sw.lng,south:sw.lat,east:ne.lng,north:ne.lat};}
 function tileRender(){
@@ -240,7 +246,7 @@ function renderDetails(){
   const score=currentScore(record),tone=scoreColor(score),confidence=record.count===1?'Solo 1 opinión: muestra muy limitada':record.count<5?'Muy pocas opiniones: muestra limitada':record.count>=25?'Más aportaciones':record.count>=10?'Muestra moderada':'Muestra pequeña';
   const ring=((score-1)/4*100).toFixed(1)+'%';
   const metric=(label,value)=>`<div class="meter-row"><div class="meter-label"><span>${label}</span><strong>${value.toFixed(1)} / 5</strong></div><div class="meter-track"><div class="meter-fill" style="width:${((value-1)/4*100).toFixed(1)}%"></div></div></div>`;
-  root.innerHTML=`<div class="details-topline"><span class="detail-eyebrow">${sectorName(c)}</span><span class="detail-eyebrow">${PREVIEW_MODE?'MUESTRA FICTICIA':'COMUNIDAD'}</span></div><div class="detail-head"><h3>${PREVIEW_MODE?'Ejemplo: '+escapeHtml(record.name):'Entorno seleccionado'}</h3><p>${escapeHtml(displayedCity())} · ${record.count} ${PREVIEW_MODE?'opiniones simuladas':record.count===1?'opinión moderada':'opiniones moderadas'}</p></div><div class="signal-block"><div class="score-ring" style="--score-percent:${ring};background:conic-gradient(${tone.fill} ${ring},#dfebe1 0)"><div><strong>${score.toFixed(1)}</strong><small>de 5</small></div></div><div class="signal-copy"><strong>${tone.label}</strong><p>Percepción al caminar ${state.mode==='day'?'de día':'de noche'}.</p></div></div><div class="detail-section-title">Mirada a la zona</div><div class="meter-list">${metric('Seguridad percibida de día',record.day)}${metric('Seguridad percibida de noche',record.night)}${metric('Iluminación percibida',record.light)}${metric('Confort acústico',record.noise)}</div><div class="data-confidence">${icon('info')} <span>${PREVIEW_MODE?'Datos 100 % inventados para probar la interfaz, no describen esta zona.':confidence+' ('+record.count+'). Las notas son percepciones subjetivas: con pocas opiniones no son representativas ni datos oficiales de delitos.'}</span></div>${PREVIEW_MODE?`<div class="sample-quotes"><strong>Opiniones de ejemplo · inventadas</strong>${record.notes.map(n=>`<p>«${escapeHtml(n)}»</p>`).join('')}</div>`:record.comments?.length?`<div class="community-comments"><strong>Comentarios de vecinos · revisados</strong>${record.comments.map(n=>`<p>«${escapeHtml(n)}»</p>`).join('')}<small>Opiniones personales, no hechos comprobados. Hasta 5 comentarios recientes.</small></div>`:''}<div class="detail-actions"><button class="primary-button" id="detailRate">${icon('plus')} ${PREVIEW_MODE?'Ir al modo real para opinar':'Compartir mi experiencia'}</button><div class="detail-secondary-actions"><button class="secondary-button" id="detailSave">${icon('bookmark')} ${selectedIsSaved()?'Guardada':'Guardar'}</button><button class="secondary-button" id="detailCompare">${icon('compare')} ${selectedIsCompared()?'Quitar':'Comparar'}</button></div></div>`;
+  root.innerHTML=`<div class="details-topline"><span class="detail-eyebrow">${sectorName(c)}</span><span class="detail-eyebrow">${PREVIEW_MODE?'MUESTRA FICTICIA':'COMUNIDAD'}</span></div><div class="detail-head"><h3>${PREVIEW_MODE?'Ejemplo: '+escapeHtml(record.name):'Entorno seleccionado'}</h3><p>${escapeHtml(displayedCity())} · ${record.count} ${PREVIEW_MODE?'opiniones simuladas':record.count===1?'opinión moderada':'opiniones moderadas'}</p></div><div class="signal-block"><div class="score-ring" style="--score-percent:${ring};background:conic-gradient(${tone.fill} ${ring},#dfebe1 0)"><div><strong>${score.toFixed(1)}</strong><small>de 5</small></div></div><div class="signal-copy"><strong>${tone.label}</strong><p>Seguridad percibida ${state.mode==='day'?'de día':'de noche'}; no es la media de todos los indicadores.</p></div></div><div class="detail-section-title">Mirada a la zona</div><div class="meter-list">${metric('Seguridad percibida de día',record.day)}${metric('Seguridad percibida de noche',record.night)}${metric('Iluminación percibida',record.light)}${metric('Confort acústico',record.noise)}</div><div class="data-confidence">${icon('info')} <span>${PREVIEW_MODE?'Datos 100 % inventados para probar la interfaz, no describen esta zona.':confidence+' ('+record.count+'). Las notas son percepciones subjetivas: con pocas opiniones no son representativas ni datos oficiales de delitos.'}</span></div>${PREVIEW_MODE?`<div class="sample-quotes"><strong>Opiniones de ejemplo · inventadas</strong>${record.notes.map(n=>`<p>«${escapeHtml(n)}»</p>`).join('')}</div>`:record.comments?.length?`<div class="community-comments"><strong>Comentarios de vecinos · revisados</strong>${record.comments.map(n=>`<p>«${escapeHtml(n)}»</p>`).join('')}<small>Opiniones personales, no hechos comprobados. Hasta 5 comentarios recientes.</small></div>`:''}<div class="detail-actions"><button class="primary-button" id="detailRate">${icon('plus')} ${PREVIEW_MODE?'Ir al modo real para opinar':'Compartir mi experiencia'}</button><div class="detail-secondary-actions"><button class="secondary-button" id="detailSave">${icon('bookmark')} ${selectedIsSaved()?'Guardada':'Guardar'}</button><button class="secondary-button" id="detailCompare">${icon('compare')} ${selectedIsCompared()?'Quitar':'Comparar'}</button></div></div>`;
   bindDetails();
 }
 function bindDetails(){
@@ -270,7 +276,7 @@ function toggleCompare(){
 function chooseLocation(place,zoom=14){
   state.city=place.name;state.center={lat:Number(place.lat),lng:Number(place.lng)};state.zoom=zoom;
   state.selected=cellAt(state.center.lat,state.center.lng);state.realCells=[];
-  EL('crumbCity').textContent=state.city;EL('headingCity').textContent='/ '+state.city;EL('mapCityLabel').textContent=state.city+', España';
+  syncCityLabels();
   EL('placeSearch').value='';
   changeView('explorar');
   renderCounters();renderAllMap();renderDetails();refreshRealData();
@@ -478,8 +484,8 @@ function start(){
     if(notice){notice.querySelector('strong').textContent='Datos reales: pendiente de configurar';
       notice.querySelector('span').textContent='La app todavia no esta conectada a la base de datos. No hay cifras ficticias y no se pueden enviar votos hasta terminar el despliegue.';}
   }
+  syncCityLabels();
   if(PREVIEW_MODE){
-    EL('crumbCity').textContent='Huelva'; EL('headingCity').textContent='/ Huelva'; EL('mapCityLabel').textContent='Huelva, España';
     const notice=EL('communityNotice');
     notice.classList.add('preview-notice');
     notice.querySelector('strong').textContent='MODO MUESTRA · OPINIONES INVENTADAS EN HUELVA';

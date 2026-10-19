@@ -55,3 +55,7 @@ La raíz contiene el código fuente de la PWA para permitir su mantenimiento. Po
 El proyecto utiliza el dominio principal `https://barrioradar-pwa.onrender.com` para que la PWA instalada pueda actualizar su service worker y caché.
 
 La privacidad y las condiciones del servicio deben recibir revisión jurídica antes de abrir al público.
+
+## Corrección de la ciudad inicial (v13)
+
+El HTML, el estado inicial y las etiquetas del mapa arrancan todos en Huelva. Un sincronizador central actualiza el título, la navegación y la ubicación visible al inicio y al cambiar de ciudad. La nota principal de la ficha representa el indicador de día o noche seleccionado, no el promedio global de las cuatro métricas. Se renueva la caché PWA para desplegar la corrección.
