@@ -1,24 +1,51 @@
-# BarrioRadar · PWA comunitaria
+# BarrioRadar — PWA de opiniones vecinales moderadas
 
-Aplicación web progresiva con Supabase PostgreSQL/Auth para recopilar **percepciones vecinales moderadas**, no estadísticas oficiales de delitos.
+BarrioRadar muestra **percepciones subjetivas de personas con correo verificado**, no estadísticas oficiales de delitos ni indicadores objetivos de seguridad. El mapa se abre en **Huelva**. Las opiniones reales solo aparecen cuando están **aprobadas**. Una única opinión aprobada puede visualizarse con aviso explícito de muestra muy limitada.
 
-## Producción
+## Sitio de producción
 
-- [Abrir BarrioRadar](https://barrioradar-pwa.onrender.com/)
-- [Administración](https://barrioradar-pwa.onrender.com/admin.html)
-- Proyecto Supabase: `ipbqymwaxgsoshwexusk`
-- Ciudad inicial: Huelva, España.
-- Una valoración **aprobada** basta para mostrar un sector. De 1 a 4 opiniones se advierte que la muestra es muy limitada. No se publican opiniones pendientes.
-- `/?muestras=1` muestra un modo de diseño con puntuaciones ficticias, segregado de los datos reales.
+- Aplicación: https://barrioradar-pwa.onrender.com/
+- Moderación: https://barrioradar-pwa.onrender.com/admin.html
+- Versión de muestra: `/?muestras=1` (opiniones **ficticias**, sin mezclarse con los datos reales).
+- Datos y autenticación: Supabase Postgres/Auth. SMTP de autenticación: Brevo, gestionado por Supabase Auth.
 
-## Despliegue actual en Render
+## Cómo funcionan las valoraciones
 
-El servicio original utiliza temporalmente el archivo de compatibilidad `.github/workflows/barrioradar-pwa.zip`, porque su Build Command ya estaba configurado para descomprimirlo. Este ZIP contiene `barrioradar/public/` y **no debe confundirse con un workflow de GitHub Actions**.
+1. El usuario inicia sesión con un correo confirmado.
+2. Puede valorar **todas las zonas que quiera**.
+3. En cada zona se almacena **solo una valoración vigente** por usuario autenticado (`actor_id`, `cell_id`). Las modificaciones sustituyen la anterior en la base de datos, nunca se suman como votos adicionales.
+4. La valoración nueva y **cada modificación** vuelven a moderación. El comentario libre es opcional (máx. 500 caracteres).
+5. Al editar una zona ya valorada, se presenta un aviso visible y **se pide confirmación antes de sobrescribir** la contribución anterior. Cancelar no modifica nada.
+6. Para evitar reenvíos repetidos, el backend exige **esperar al menos 2 minutos** antes de modificar de nuevo la misma zona. No existe un máximo de zonas ni un límite de por vida para editar.
 
-**Pendiente de mantenimiento:** mover los archivos fuente descomprimidos a la raíz del repositorio y cambiar el Build Command de Render a `echo 'Sitio estático listo'` con Publish Directory `public`.
+### Controles de privacidad
 
-En Supabase Auth, configurar la URL principal `https://barrioradar-pwa.onrender.com` entre los destinos de redirección permitidos, manteniendo la URL beta si aún se utiliza.
+- La base de datos comprueba la titularidad del voto con `auth.uid()`, no con una dirección de correo enviada desde el navegador.
+- `br_my_sector_review` solo está disponible para usuarios autenticados y únicamente indica si ese usuario ya valoró ese sector. No expone puntuaciones ni correos de otros usuarios.
+- Los comentarios públicos solo se obtienen de las valoraciones aprobadas, previa moderación, escapando HTML en el navegador.
+- Nunca subir claves de servicio, contraseñas SMTP ni secretos al repositorio.
 
-## Seguridad y alcance
+## Desarrollo
 
-El cliente solo utiliza una clave **publishable**. Las validaciones y la moderación se aplican en las funciones RPC de PostgreSQL. El servicio está en beta y la política de privacidad provisional requiere completar la identidad/contacto del responsable y revisión legal antes de una apertura general.
+Los archivos públicos, editables y revisables están en `public/`. Requiere Node 22 para el servidor local opcional:
+
+```sh
+npm start
+npm test
+```
+
+Para conectarlo a Supabase se utiliza `public/config.js` con una clave **publishable** (pública), nunca una service-role/secret key.
+
+## Despliegue de producción
+
+El servicio Render existente sirve `barrioradar/public` después de ejecutar:
+
+```sh
+unzip -q .github/workflows/barrioradar-pwa.zip -d . && test -f barrioradar/public/index.html && test -f barrioradar/public/manifest.webmanifest && test -f barrioradar/public/sw.js
+```
+
+La raíz contiene el código fuente de la PWA para permitir su mantenimiento. Por compatibilidad con el Build Command del servicio actualmente desplegado, `barrioradar-pwa.zip` sigue versionado en `.github/workflows/`, **aunque no es un workflow de GitHub Actions**. Cada actualización debe regenerar el ZIP con los mismos archivos de `public/` hasta que se actualice el comando de compilación de Render para publicar directamente `public/`. No borrar el ZIP sin cambiar primero la configuración de Render.
+
+El proyecto utiliza el dominio principal `https://barrioradar-pwa.onrender.com` para que la PWA instalada pueda actualizar su service worker y caché.
+
+La privacidad y las condiciones del servicio deben recibir revisión jurídica antes de abrir al público.

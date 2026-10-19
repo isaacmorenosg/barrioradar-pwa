@@ -1,0 +1,16 @@
+{
+  "id": "/",
+  "name": "BarrioRadar · Tu próxima zona, con contexto",
+  "short_name": "BarrioRadar",
+  "description": "Mapa participativo de experiencias sobre tranquilidad, iluminacion y ambiente para explorar barrios en Espana",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4f7f3",
+  "theme_color": "#f4f7f3",
+  "lang": "es-ES",
+  "icons": [
+    {"src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
