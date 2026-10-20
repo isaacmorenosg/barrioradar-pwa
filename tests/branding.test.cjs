@@ -22,5 +22,16 @@ test('brand colors do not overwrite sector assessment fills',()=>{
  assert.match(css,/--zonenta-navy:#0F2D5B/);
  assert.match(css,/--zonenta-orange:#FF6B3D/);
  assert.doesNotMatch(css,/\.map-overlay polygon\s*\{[^}]*fill:/);
- assert.match(sw,/zonenta-pwa-v29-comparison-palette/);
+ assert.match(sw,/zonenta-pwa-v30-install-icons/);
+});
+
+test('Android installation uses updated PNG brand icons and maskable artwork',()=>{
+ assert.deepEqual(manifest.icons.filter(i=>i.type==='image/png').map(i=>i.sizes),['192x192','512x512','512x512']);
+ assert.ok(manifest.icons.some(i=>i.purpose==='maskable'&&i.src==='/icons/zonenta-maskable-512.png'));
+ for(const file of ['zonenta-192.png','zonenta-512.png','zonenta-maskable-512.png','icon-192.png','icon-512.png']){
+  const bytes=readFileSync(join(__dirname,'../public/icons',file));
+  assert.equal(bytes.subarray(0,4).toString('hex'),'89504e47');
+ }
+ assert.match(html,/rel="apple-touch-icon"[^>]+zonenta-192\.png/);
+ assert.match(sw,/zonenta-pwa-v30-install-icons/);
 });

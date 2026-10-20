@@ -6,6 +6,10 @@ La identidad pública de BarrioRadar cambia a **Zonenta**, con azul marino `#0F2
 
 BarrioRadar muestra **percepciones subjetivas de personas con correo verificado**, no estadísticas oficiales de delitos ni indicadores objetivos de seguridad. El mapa se abre en **Huelva**. Las opiniones reales solo aparecen cuando están **aprobadas**. Una única opinión aprobada puede visualizarse con aviso explícito de muestra muy limitada.
 
+## Icono de la PWA (v30)
+
+El icono de instalación de **Zonenta** utiliza el azul marino `#0F2D5B`, el localizador naranja `#FF6B3D` y su círculo blanco roto. Se suministran iconos PNG de 192 y 512 píxeles, un icono independiente *maskable* para Android, además del favicon SVG. También se sustituyen los PNG antiguos (`icon-192.png` e `icon-512.png`) y se renuevan las URLs del manifiesto para favorecer la actualización del acceso directo sin cambiar el identificador de la PWA ni los datos del usuario. Android/WebAPK puede tardar en actualizar el icono del lanzador; reinstalar la PWA puede ser necesario en algunos dispositivos y podría eliminar preferencias guardadas localmente.
+
 ## Sitio de producción
 
 - Aplicación: https://barrioradar-pwa.onrender.com/

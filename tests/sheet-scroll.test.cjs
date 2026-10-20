@@ -30,6 +30,6 @@ test('close controls remain accessible without hijacking inner scroll',()=>{
   assert.ok(!ui.includes("detailsContent').addEventListener('touchmove'"));
 });
 test('service worker refreshes cached CSS in installed PWA',()=>{
-  assert.ok(sw.includes('zonenta-pwa-v29-comparison-palette'));
+  assert.ok(sw.includes('zonenta-pwa-v30-install-icons'));
   assert.ok(sw.includes("'/radar-dark.css'"));
 });
