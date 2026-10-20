@@ -269,3 +269,26 @@ html,body,.app-shell,.main-content{background:#F8F9FB!important;color:var(--ink)
 .zonenta-brand img{display:block;width:188px;max-width:100%;height:auto}
 @media(max-width:760px){.topbar-mobile-brand .topbar-mobile-logo{width:150px;max-width:100%;height:auto}}
 @media(max-width:360px){.topbar-mobile-brand .topbar-mobile-logo{width:136px;height:auto}}
+
+/* v39: progress appears immediately without blocking the map indefinitely. */
+.zonenta-spinner{
+  display:inline-block;width:16px;height:16px;flex:0 0 16px;
+  border:2px solid currentColor;border-right-color:transparent;border-radius:50%;
+  animation:zonenta-rotate .75s linear infinite;vertical-align:middle;
+}
+@keyframes zonenta-rotate{to{transform:rotate(360deg)}}
+.zonenta-checking{
+  display:flex;align-items:center;gap:12px;
+  padding:14px;margin:12px 0 18px;border-radius:12px;
+  background:#FFF4EE;border:1px solid #F8D9CA;
+  color:#5B5870;line-height:1.55;font-size:13px;
+}
+.zonenta-checking .zonenta-spinner{color:#CA451D}
+button[aria-busy="true"]{display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:progress}
+button[aria-busy="true"] .zonenta-spinner{color:inherit;width:14px;height:14px;flex-basis:14px}
+.map-loader:not([hidden])::before{
+  content:"";display:inline-block;width:12px;height:12px;margin-right:8px;
+  border:2px solid #CA451D;border-right-color:transparent;border-radius:50%;
+  animation:zonenta-rotate .75s linear infinite;vertical-align:-2px;
+}
+@media(prefers-reduced-motion:reduce){.zonenta-spinner,.map-loader:not([hidden])::before{animation:none;border-right-color:currentColor}}
