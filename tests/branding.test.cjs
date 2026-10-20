@@ -12,7 +12,7 @@ test('Zonenta identity replaces public branding',()=>{
  assert.match(html,/class="topbar-mobile-logo"[^>]+zonenta-lockup\.svg/);
  assert.match(css,/\.topbar-crumb #crumbCity,\.topbar-crumb \.crumb-chevron\{display:none!important\}/);
  assert.match(read('icons/zonenta-wordmark.svg'),/<path fill="#0F2D5B"/);
- assert.match(read('icons/zonenta-lockup.svg'),/cx="336" cy="61" r="8"/);
+ assert.match(read('icons/zonenta-lockup.svg'),/cx="325" cy="61" r="8"/);
  assert.match(html,/class="mobile-rate-cta" id="mobileRateCTA" disabled/);
  assert.match(html,/class="mobile-sheet-chip" id="mobileSheetChip"[^>]*disabled/);
  assert.equal(manifest.short_name,'Zonenta');
@@ -46,8 +46,15 @@ test('orange dot does not touch the last letter at small sizes',()=>{
   assert.ok(dot,'A standalone orange punctuation mark must be present');
   // The final letter's rightmost vector x-coordinate is 312.18.
   const clearSpace=Number(dot[1])-Number(dot[2])-312.18;
-  assert.ok(clearSpace>=15,'The orange dot must be visibly separated from the last a');
+  assert.ok(clearSpace>=3&&clearSpace<=6,'The dot must be very close to the last a without touching it');
  }
  assert.match(compact,/viewBox="0 0 356 90"/);
  assert.match(lockup,/viewBox="0 0 1000 350"/);
+});
+
+test('in-app opening image is visible from the first document paint',()=>{
+  assert.ok(html.indexOf('id="zonenta-splash-critical"')>0);
+  assert.match(html,/class="zonenta-splash-art" src="data:image\/svg\+xml,/);
+  assert.match(html,/class="zonenta-splash-center" src="data:image\/svg\+xml,/);
+  assert.ok(html.indexOf('<script src="/splash.js" defer></script>')<html.indexOf('<link rel="stylesheet" href="/styles.css">'));
 });

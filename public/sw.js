@@ -1,4 +1,4 @@
-const SHELL='zonenta-pwa-v31-brand-splash';
+const SHELL='zonenta-pwa-v31-brand-splash-v32-first-frame';
 const ASSETS=['/','/index.html','/styles.css','/radar-dark.css','/radar-light.css','/zonenta-theme.css','/splash.css','/splash.js','/assets/zonenta-opening.svg','/icons/zonenta-lockup.svg','/icons/zonenta-icon.svg','/icons/zonenta-wordmark.svg','/icons/zonenta-192.png','/icons/zonenta-512.png','/icons/zonenta-maskable-512.png','/icons/icon-192.png','/icons/icon-512.png','/app.js','/radar-ui.js','/mobile-sheet-fix.css','/mobile-sheet-fix.js','/config.js','/supabase-api.js','/manifest.webmanifest','/icons.svg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(SHELL).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==SHELL).map(k=>caches.delete(k)))),self.clients.claim()])));
