@@ -22,7 +22,7 @@ test('map simplified selection and equal-weight four metric color are preserved'
   assert.match(html,/id="mobileSheetChip"/);
 });
 test('installed PWA invalidates old icons and styles cache',()=>{
-  assert.match(sw,/barrioradar-pulse-mapas-v22-map-visibility-account/);
+  assert.match(sw,/barrioradar-pulse-mapas-v23-rating-confirm/);
   assert.match(sw,/'\/icons\.svg'/);
   assert.match(sw,/'\/radar-dark\.css'/);
 });
