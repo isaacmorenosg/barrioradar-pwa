@@ -12,7 +12,7 @@ for (const [id,label] of [['crumbCity','Huelva'],['headingCity','/ Huelva'],['ma
 assert.ok(app.indexOf('syncCityLabels();\n  if(PREVIEW_MODE)') > app.indexOf('function start()'),'Boot must sync selected city labels');
 assert.match(app,/function chooseLocation\(place,zoom=14\)\{[\s\S]*?syncCityLabels\(\);/,'Search city should synchronize all city labels');
 assert.match(app,/values.reduce\(\(sum,value\)=>sum\+value,0\)\/4/,'Map color is now the mean of all four metrics');
-assert.match(sw,/zonenta-pwa-v27-mobile-header/,'The service-worker cache must be invalidated');
+assert.match(sw,/zonenta-pwa-v28-ratings-refresh/,'The service-worker cache must be invalidated');
 const labels = {crumbCity:{textContent:''},headingCity:{textContent:''},mapCityLabel:{textContent:''}};
 const state={city:'Huelva'};
 const code = app.slice(app.indexOf('function displayedCity()'),app.indexOf('function drawBackground()'));

@@ -177,3 +177,18 @@ html,body,.app-shell,.main-content{background:#F8F9FB!important;color:var(--ink)
   .topbar-mobile-brand .topbar-mobile-logo{width:136px;max-width:100%;height:auto}
   .topbar-mobile-tagline{font-size:7.9px;letter-spacing:-.25px}
 }
+
+/* v28: distinguish fetching, empty results and a recoverable loading error. */
+.ratings-status[hidden],.ratings-status button[hidden]{display:none!important}
+.ratings-status{
+  position:absolute;left:16px;top:62px;z-index:12;
+  display:flex;gap:10px;align-items:center;max-width:calc(100% - 95px);
+  border:1px solid #D6E2EF;background:rgba(255,255,255,.97);color:#405570;
+  border-radius:12px;padding:9px 12px;font-size:11px;font-weight:650;line-height:1.4;
+  box-shadow:0 6px 20px rgba(15,45,91,.12);pointer-events:none;
+}
+.ratings-status.is-error{border-color:#F1BCA9;color:#A63C20;pointer-events:auto}
+.ratings-status button{border:0;border-radius:8px;padding:7px 11px;color:#fff;background:#CA451D;font-weight:800;pointer-events:auto}
+@media(max-width:760px){
+  .ratings-status{top:auto;bottom:calc(265px + env(safe-area-inset-bottom));left:14px;max-width:calc(100vw - 95px);padding:8px 10px;font-size:10px}
+}

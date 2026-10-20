@@ -100,7 +100,7 @@ function migrateSavedSectors(){
 migrateSavedSectors();
 
 const state={city:'Huelva',center:{lat:37.2614,lng:-6.9447},zoom:14,realCells:[],selected:null,saved:safeRead('br_saved_v2',[]).filter(i=>!i.demo).map(i=>({...i,snapshot:null})),comparison:safeRead('br_compare_v2',[]).filter(i=>!i.demo).map(i=>({...i,snapshot:null})),view:'explorar',userSelected:false,deferredInstall:null};
-const map={viewport:null,tiles:null,overlay:null,w:0,h:0,drag:null,readSeq:0};
+const map={viewport:null,tiles:null,overlay:null,w:0,h:0,drag:null,readSeq:0,ratingsAbort:null,refreshFrame:0,lastRatingsSuccess:0};
 const commentsView={cellId:null,items:[],total:0,loaded:false,loading:false,error:false,seq:0};
 let toastTimer=0;
 function toast(message){const el=EL('toast');el.textContent=message;el.classList.add('shown');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('shown'),3300);}
@@ -165,11 +165,46 @@ function overlayRender(){
   map.overlay.innerHTML=out;
 }
 function renderAllMap(){tileRender();overlayRender();}
+// The map can be hidden when navigating between pages. Fetch only after it is
+// visible and has real dimensions; repainting tiles alone cannot restore ratings.
+function ratingsStatus(message='',canRetry=false){
+  const status=EL('ratingsStatus');
+  if(!status)return;
+  status.hidden=!message;
+  EL('ratingsStatusText').textContent=message;
+  EL('retryRatings').hidden=!canRetry;
+  status.classList.toggle('is-error',canRetry);
+}
+function cancelRatingsRequest(){
+  map.readSeq++;
+  if(map.ratingsAbort){map.ratingsAbort.abort();map.ratingsAbort=null;}
+}
+function scheduleMapRefresh(){
+  if(map.refreshFrame)cancelAnimationFrame(map.refreshFrame);
+  map.refreshFrame=requestAnimationFrame(()=>{
+    map.refreshFrame=0;
+    if(state.view!=='explorar'||!map.viewport)return;
+    const rect=map.viewport.getBoundingClientRect();
+    const width=Math.round(rect.width),height=Math.round(rect.height);
+    if(width<1||height<1)return;
+    map.w=width;map.h=height;
+    renderAllMap();
+    refreshRealData();
+  });
+}
 function positionFromPointer(event){const box=map.viewport.getBoundingClientRect();return{x:event.clientX-box.left,y:event.clientY-box.top};}
 function pointerToCoord(pt){const center=toPx(state.center.lat,state.center.lng,state.zoom);return pxToLL(center.x+pt.x-map.w/2,center.y+pt.y-map.h/2,state.zoom);}
 function initMap(){
   map.viewport=EL('mapViewport');map.tiles=EL('mapTiles');map.overlay=EL('mapOverlay');
-  const resize=()=>{const box=map.viewport.getBoundingClientRect();map.w=Math.round(box.width);map.h=Math.round(box.height);renderAllMap();};
+  const resize=()=>{
+    if(state.view!=='explorar')return;
+    const box=map.viewport.getBoundingClientRect();
+    const width=Math.round(box.width),height=Math.round(box.height);
+    if(width<1||height<1||width===map.w&&height===map.h)return;
+    map.w=width;map.h=height;
+    renderAllMap();
+    scheduleMapRefresh();
+  };
   new ResizeObserver(resize).observe(map.viewport);resize();
   // Track both fingers. A pinch is not a tap: never send it to sector selection.
   const activePointers=new Map();
@@ -382,30 +417,63 @@ function toggleCompare(){
   persist();renderDetails();renderComparePage();
 }
 function chooseLocation(place,zoom=14){
+  const changingCity=state.city!==place.name;
+  cancelRatingsRequest();
   state.city=place.name;state.center={lat:Number(place.lat),lng:Number(place.lng)};state.zoom=zoom;
-  state.selected=cellAt(state.center.lat,state.center.lng);state.userSelected=false;state.realCells=[];
+  state.selected=cellAt(state.center.lat,state.center.lng);state.userSelected=false;
+  // Keep already loaded opinions when opening a compared/saved sector in this city.
+  // New locations must still load their own data rather than showing stale votes.
+  if(changingCity)state.realCells=[];
   syncCityLabels();
   EL('placeSearch').value='';
   changeView('explorar');
-  renderCounters();renderAllMap();renderDetails();refreshRealData();
+  renderCounters();renderDetails();
 }
 async function refreshRealData(){
-  const token=++map.readSeq;
-  if(!map.w||!map.h)return;
+  if(state.view!=='explorar'||!map.w||!map.h)return;
   const box=mapBounds();
   const clipped={west:clamp(box.west,-18.5,5),south:clamp(box.south,27,44.5),east:clamp(box.east,-18.5,5),north:clamp(box.north,27,44.5)};
-  if(clipped.east<=clipped.west||clipped.north<=clipped.south)return;
+  cancelRatingsRequest();
+  const token=map.readSeq;
+  if(clipped.east<=clipped.west||clipped.north<=clipped.south){
+    state.realCells=[];renderCounters();overlayRender();renderDetails();ratingsStatus('Fuera del área cubierta por el mapa.');return;
+  }
   if(PREVIEW_MODE){
     state.realCells=previewRecords().filter(p=>p.lng>=clipped.west-.015&&p.lng<=clipped.east+.015&&p.lat>=clipped.south-.015&&p.lat<=clipped.north+.015);
-    renderCounters();overlayRender();renderDetails();return;
+    renderCounters();overlayRender();renderDetails();ratingsStatus();return;
   }
+  if(!window.BarrioAPI?.configured){
+    state.realCells=[];renderCounters();overlayRender();renderDetails();ratingsStatus('Las valoraciones todavía no están disponibles.');return;
+  }
+  const controller=new AbortController();
+  map.ratingsAbort=controller;
+  ratingsStatus(state.realCells.length?'Actualizando opiniones…':'Cargando opiniones del mapa…');
   try{
-    if(!window.BarrioAPI?.configured){state.realCells=[];renderCounters();overlayRender();renderDetails();return;}
-    const json=await window.BarrioAPI.getRatings(clipped);
-    if(map.readSeq!==token)return;
-    state.realCells=(json.cells||[]).map(c=>{const [q,r]=c.id.split(':').map(Number);return {...cell(q,r),count:c.count,day:c.day,night:c.night,light:c.light,noise:c.noise,comments:Array.isArray(c.comments)?c.comments.filter(x=>typeof x==='string').slice(0,5):[]};});
+    let json;
+    // Retry once after a transient network error. An older request can never
+    // erase the results of a newer one, even when the old request fails late.
+    for(let attempt=0;attempt<2;attempt++){
+      try{json=await window.BarrioAPI.getRatings(clipped,controller.signal);break;}
+      catch(error){
+        if(map.readSeq!==token||controller.signal.aborted)return;
+        if(attempt===1)throw error;
+        await new Promise(resolve=>setTimeout(resolve,450));
+        if(map.readSeq!==token||controller.signal.aborted)return;
+      }
+    }
+    if(map.readSeq!==token||controller.signal.aborted||state.view!=='explorar')return;
+    if(!json||!Array.isArray(json.cells))throw new Error('Respuesta incompleta de las valoraciones.');
+    state.realCells=json.cells.map(c=>{const [q,r]=c.id.split(':').map(Number);return {...cell(q,r),count:c.count,day:c.day,night:c.night,light:c.light,noise:c.noise,comments:Array.isArray(c.comments)?c.comments.filter(x=>typeof x==='string').slice(0,5):[]};});
+    map.lastRatingsSuccess=Date.now();
     renderCounters();overlayRender();renderDetails();
-  }catch{state.realCells=[];renderCounters();overlayRender();renderDetails();toast('Sin conexión con las valoraciones. Inténtalo más tarde.');}
+    ratingsStatus(state.realCells.length?'':'Todavía no hay opiniones aprobadas en esta parte del mapa.');
+  }catch(error){
+    if(map.readSeq!==token||controller.signal.aborted||state.view!=='explorar')return;
+    // Never replace valid visible sectors with an empty map on network errors.
+    ratingsStatus(state.realCells.length?'No se pudieron actualizar las opiniones.':'No se pudieron cargar las opiniones.',true);
+  }finally{
+    if(map.ratingsAbort===controller)map.ratingsAbort=null;
+  }
 }
 function escapeHtml(str){return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 async function searchPlace(term){
@@ -438,13 +506,16 @@ function openPlaceResults(places){
   }));
 }
 function changeView(view){
+  if(view!=='explorar'&&state.view==='explorar'){
+    cancelRatingsRequest();ratingsStatus();
+  }
   state.view=view;
   const mapViews={explorar:'viewExplorar',guardadas:'viewGuardadas',comparar:'viewComparar',metodologia:'viewMetodologia'};
   for(const [key,id] of Object.entries(mapViews))EL(id).classList.toggle('hidden',key!==view);
   document.querySelectorAll('[data-view]').forEach(btn=>btn.classList.toggle('active',btn.dataset.view===view));
   document.querySelectorAll('.page-view').forEach(p=>p.setAttribute('aria-hidden',p.classList.contains('hidden')?'true':'false'));
   if(view==='guardadas')renderSavedPage();if(view==='comparar')renderComparePage();
-  if(view==='explorar')setTimeout(()=>{const box=map.viewport.getBoundingClientRect();map.w=Math.round(box.width);map.h=Math.round(box.height);renderAllMap();},0);
+  if(view==='explorar')scheduleMapRefresh();
   window.scrollTo({top:0,behavior:'instant'});
 }
 function renderSavedPage(){
@@ -639,6 +710,13 @@ function bindUI(){
   EL('planBtn').addEventListener('click',openPlan);
   EL('mobileMenu').addEventListener('click',openInstallHelp);
   EL('accountButton').addEventListener('click',openAccount);
+  EL('retryRatings').addEventListener('click',scheduleMapRefresh);
+  window.addEventListener('pageshow',event=>{
+    if(event.persisted&&state.view==='explorar')scheduleMapRefresh();
+  });
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden&&state.view==='explorar'&&(!map.lastRatingsSuccess||Date.now()-map.lastRatingsSuccess>60000))scheduleMapRefresh();
+  });
   EL('installApp').addEventListener('click',async()=>{if(state.deferredInstall){state.deferredInstall.prompt();await state.deferredInstall.userChoice;state.deferredInstall=null;}else openInstallHelp();});
   EL('modalRoot').addEventListener('click',e=>{if(e.target===EL('modalRoot'))closeModal();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
@@ -666,7 +744,7 @@ function start(){
     if(intro)intro.hidden=false;
   }
   state.selected=PREVIEW_MODE?previewRecords()[0]:cellAt(state.center.lat,state.center.lng);
-  bindUI();initMap();renderDetails();renderCounters();refreshRealData();updateAccountButton();
+  bindUI();initMap();renderDetails();renderCounters();scheduleMapRefresh();updateAccountButton();
   if(window.BarrioAPI?.configured)window.BarrioAPI.onCommunityAuthChange(async()=>{await updateAccountButton();if(EL('emailLoginForm')&&!EL('modalRoot').classList.contains('hidden')){try{const u=await window.BarrioAPI.getCommunityUser();if(u){closeModal();toast('Correo verificado. Ya puedes opinar.');}}catch{}}});
 }
 document.addEventListener('DOMContentLoaded',start);
