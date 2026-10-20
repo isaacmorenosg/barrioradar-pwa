@@ -24,13 +24,29 @@
   function throwIf(error) {
     if (error) throw new Error(error.message || 'Error de conexion con Supabase.');
   }
-  async function getRatings(bounds) {
-    const { data, error } = await getClient().rpc('br_public_ratings', {
-      p_west: Number(bounds.west), p_south: Number(bounds.south),
-      p_east: Number(bounds.east), p_north: Number(bounds.north)
-    });
-    throwIf(error);
-    return data || { cells: [] };
+  async function getRatings(bounds, externalSignal) {
+    const controller=new AbortController();
+    const stop=()=>controller.abort();
+    if(externalSignal){
+      if(externalSignal.aborted)controller.abort();
+      else externalSignal.addEventListener('abort',stop,{once:true});
+    }
+    // Avoid a perpetual blank loading map on slow/stalled requests.
+    const timeout=setTimeout(()=>controller.abort(),14000);
+    try{
+      if(controller.signal.aborted)throw new Error('Consulta cancelada.');
+      const {data,error}=await getClient().rpc('br_public_ratings',{
+        p_west:Number(bounds.west),p_south:Number(bounds.south),
+        p_east:Number(bounds.east),p_north:Number(bounds.north)
+      }).abortSignal(controller.signal);
+      if(controller.signal.aborted)throw new Error('La consulta ha tardado demasiado. Reintenta.');
+      throwIf(error);
+      if(!data||!Array.isArray(data.cells))throw new Error('Respuesta incompleta de las valoraciones.');
+      return data;
+    }finally{
+      clearTimeout(timeout);
+      externalSignal?.removeEventListener('abort',stop);
+    }
   }
   // Fetch every approved written comment, 20 at a time, only for the selected sector.
   async function getSectorComments(cellId,offset=0,limit=20){
