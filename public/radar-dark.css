@@ -219,3 +219,51 @@ button{touch-action:manipulation}
   .mobile-nav button{font-size:9px}
   #viewExplorar:not(.hidden){min-height:0}
 }
+
+/* Fix: independently scrollable sector sheet on touch devices (v17). */
+@media(max-width:760px){
+  /* Fixed viewport-sized sheet; its body is the only vertical scroll area. */
+  #viewExplorar #detailsCard{
+    display:flex!important;
+    flex-direction:column;
+    height:86vh!important;
+    height:86dvh!important;
+    max-height:calc(100vh - 12px)!important;
+    max-height:calc(100dvh - env(safe-area-inset-top) - 12px)!important;
+    min-height:0!important;
+    overflow:hidden;
+  }
+  /* Keep dismiss actions visible independently of scrolling comments. */
+  #viewExplorar #detailsCard .sheet-topbar{
+    position:relative;
+    inset:auto;
+    flex:0 0 46px;
+    height:46px;
+    min-height:46px;
+    touch-action:manipulation;
+  }
+  /* Flex item must be allowed to shrink and scroll instead of being clipped. */
+  #viewExplorar #detailsContent{
+    display:block!important;
+    flex:1 1 0%;
+    height:0!important;
+    max-height:none!important;
+    min-height:0!important;
+    min-width:0;
+    padding:9px 19px calc(40px + env(safe-area-inset-bottom));
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:contain;
+    touch-action:pan-y;
+    scrollbar-width:thin;
+  }
+  #viewExplorar #detailsContent > *{max-width:100%;min-width:0}
+  #viewExplorar #detailsContent .community-comments,
+  #viewExplorar #detailsContent .community-comments p{
+    max-width:100%;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    white-space:pre-wrap;
+  }
+}
