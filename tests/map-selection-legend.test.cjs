@@ -31,5 +31,5 @@ test('map shows only colored sectors, without numeric review badges',()=>{
   assert.match(app,/values.reduce\(\(sum,value\)=>sum\+value,0\)\/4/);
 });
 test('service worker updates mobile interface assets',()=>{
-  assert.match(sw,/barrioradar-pulse-mapas-v24-bolder-sectors/);
+  assert.match(sw,/barrioradar-pulse-mapas-v25-light-theme/);
 });

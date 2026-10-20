@@ -29,5 +29,5 @@ test('no numeric opinion badges return on the map',()=>{
   assert.doesNotMatch(app,/class="polygon-count"|polygon-count-bg/);
 });
 test('installed PWA refreshes assets to the brighter sector style',()=>{
-  assert.match(sw,/barrioradar-pulse-mapas-v24-bolder-sectors/);
+  assert.match(sw,/barrioradar-pulse-mapas-v25-light-theme/);
 });
