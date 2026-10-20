@@ -31,5 +31,5 @@ test('map shows only colored sectors, without numeric review badges',()=>{
   assert.match(app,/values.reduce\(\(sum,value\)=>sum\+value,0\)\/4/);
 });
 test('service worker updates mobile interface assets',()=>{
-  assert.match(sw,/zonenta-pwa-v28-ratings-refresh/);
+  assert.match(sw,/zonenta-pwa-v29-comparison-palette/);
 });

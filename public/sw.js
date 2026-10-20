@@ -1,4 +1,4 @@
-const SHELL='zonenta-pwa-v28-ratings-refresh';
+const SHELL='zonenta-pwa-v29-comparison-palette';
 const ASSETS=['/','/index.html','/styles.css','/radar-dark.css','/radar-light.css','/zonenta-theme.css','/icons/zonenta-icon.svg','/icons/zonenta-wordmark.svg','/app.js','/radar-ui.js','/mobile-sheet-fix.css','/mobile-sheet-fix.js','/config.js','/supabase-api.js','/manifest.webmanifest','/icons.svg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(SHELL).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==SHELL).map(k=>caches.delete(k)))),self.clients.claim()])));

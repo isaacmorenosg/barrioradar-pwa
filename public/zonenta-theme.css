@@ -192,3 +192,76 @@ html,body,.app-shell,.main-content{background:#F8F9FB!important;color:var(--ink)
 @media(max-width:760px){
   .ratings-status{top:auto;bottom:calc(265px + env(safe-area-inset-bottom));left:14px;max-width:calc(100vw - 95px);padding:8px 10px;font-size:10px}
 }
+
+
+/* Zonenta v29 — unified palette for comparison, saved places and methodology. */
+.saved-card,.compare-card{
+  background:#fff;border:1px solid #E2E9F3;color:#0F2D5B;
+  box-shadow:0 8px 26px rgba(15,45,91,.065);
+}
+.saved-card .saved-pill,.compare-card .saved-pill,.compare-card .compare-zone-pill{
+  display:inline-flex;align-items:center;min-height:29px;padding:7px 11px;
+  font-size:10px;font-weight:800;letter-spacing:.35px;
+  color:#A73C1B;background:#FFF0EA;border:1px solid #FFDBCC;border-radius:9px;
+}
+.saved-card h3,.compare-card h3{color:#0F2D5B}
+.saved-card p,.compare-card p{color:#687A91}
+.saved-card-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.saved-card-actions button{
+  min-height:43px;border:1px solid #D9E2EE;padding:11px 15px;border-radius:10px;
+  background:#fff;font-size:12px;font-weight:800;color:#0F2D5B;
+  transition:background .15s ease,border-color .15s ease;
+}
+.saved-card-actions button:first-child{
+  background:#CA451D;border-color:#CA451D;color:#fff;
+}
+.saved-card-actions button:first-child:hover{background:#A93414;border-color:#A93414}
+.saved-card-actions button:not(:first-child):hover{background:#FFF0EA;border-color:#F5CAB8}
+.compare-card .compare-number{
+  display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+  margin:16px 0 18px;font-size:33px;line-height:1.18;color:#0F2D5B;
+  font-weight:850;letter-spacing:-.8px;font-variant-numeric:tabular-nums;
+}
+.compare-card .compare-number strong{font-size:inherit;line-height:inherit;font-weight:inherit}
+.compare-card .compare-number span{
+  flex:0 0 auto;font-size:12px;line-height:1.4;letter-spacing:0;
+  font-weight:650;color:#687A91;white-space:nowrap;
+}
+.compare-metric{align-items:baseline;gap:12px;border-bottom-color:#E6ECF4;font-size:12px}
+.compare-metric span{color:#687A91}
+.compare-metric b{color:#0F2D5B;font-variant-numeric:tabular-nums;white-space:nowrap}
+.compare-add-card{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;gap:12px;min-height:300px;padding:30px;
+  border:1px dashed #F3B8A3;border-radius:16px;background:#FFF9F5;
+}
+.compare-add-symbol{
+  display:grid;place-items:center;width:54px;height:54px;border-radius:18px;
+  background:#FFE4D8;color:#BA411C;font-size:31px;font-weight:650;
+}
+.compare-add-card h3{margin:0;color:#0F2D5B;font-size:19px}
+.compare-add-card p{margin:0;max-width:290px;color:#69798C;line-height:1.55;font-size:12px}
+.compare-add-card button,.empty-state button{
+  min-height:44px;padding:11px 17px;border:1px solid #CA451D;border-radius:10px;
+  background:#CA451D;color:#fff;font-size:12px;font-weight:800;
+}
+.compare-add-card button:hover,.empty-state button:hover{background:#A93414}
+.empty-state{border-color:#DDE6F0;color:#60738C}
+.empty-state .icon{color:#D5532C}
+.empty-state h3{color:#0F2D5B}
+.compare-card .empty-state{
+  margin:14px 0 22px;min-height:150px;border:1px dashed #DDE6F0;
+  background:#F8FAFD;padding:22px;
+}
+.compare-card .empty-state h3{font-size:16px;line-height:1.45}
+.method-banner{
+  background:#F0F4FA;border:1px solid #E0E8F2;color:#566B86;
+}
+.method-banner .icon{color:#D85128}
+.step-number,.method-card a{color:#BD4522}
+@media(max-width:760px){
+  body:not(.map-view-active) .mobile-rate-cta,
+  body:not(.map-view-active) .mobile-sheet-chip{display:none!important}
+  .saved-card-actions button{font-size:12px}
+  #viewComparar .comparison-layout{margin-bottom:26px}
+}

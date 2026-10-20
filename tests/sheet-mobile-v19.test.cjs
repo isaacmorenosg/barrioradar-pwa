@@ -34,7 +34,7 @@ test('expand, shrink and close keep independent controls', () => {
   assert.match(html, /id="sheetClose"/);
 });
 test('the service worker preloads new files and invalidates prior cache', () => {
-  assert.match(sw, /zonenta-pwa-v28-ratings-refresh/);
+  assert.match(sw, /zonenta-pwa-v29-comparison-palette/);
   assert.match(sw, /'\/mobile-sheet-fix.css'/);
   assert.match(sw, /'\/mobile-sheet-fix.js'/);
 });

@@ -510,6 +510,7 @@ function changeView(view){
     cancelRatingsRequest();ratingsStatus();
   }
   state.view=view;
+  document.body.classList.toggle('map-view-active',view==='explorar');
   const mapViews={explorar:'viewExplorar',guardadas:'viewGuardadas',comparar:'viewComparar',metodologia:'viewMetodologia'};
   for(const [key,id] of Object.entries(mapViews))EL(id).classList.toggle('hidden',key!==view);
   document.querySelectorAll('[data-view]').forEach(btn=>btn.classList.toggle('active',btn.dataset.view===view));
@@ -533,11 +534,24 @@ function goToSnapshot(item){
 }
 function renderComparePage(){
   const root=EL('compareList');if(!root)return;
-  if(state.comparison.length<2){root.innerHTML=`<div class="empty-state">${icon('compare')}<h3>${state.comparison.length?'Solo falta una zona':'Selecciona dos zonas para comparar'}</h3><p>${state.comparison.length?'Ya tienes una zona añadida.':'Añade dos sectores desde su ficha en el mapa.'} La comparación siempre incluye el origen y número de opiniones.</p><button id="goExploreCompare">Buscar zonas</button></div>${state.comparison.length?`<p class="modal-caption">Seleccionada: ${sectorName(state.comparison[0])} · ${escapeHtml(state.comparison[0].city)}</p>`:''}`;EL('goExploreCompare').addEventListener('click',()=>changeView('explorar'));return;}
-  const cards=state.comparison.map((c,i)=>`<div class="compare-card"><span class="saved-pill" style="font-size:9px;background:#e7f4e9;color:#4a7e55;border-radius:6px;padding:6px 9px">ZONA ${i+1}</span><h3>${sectorName(c)}</h3><p>${escapeHtml(c.city)} · captura realizada al guardar</p>${c.snapshot?`<div class="compare-number">${Number(c.snapshot.night).toFixed(1)} <span>/5, de noche</span></div><div class="compare-metric"><span>Percepción de día</span><b>${Number(c.snapshot.day).toFixed(1)} / 5</b></div><div class="compare-metric"><span>Iluminación</span><b>${Number(c.snapshot.light).toFixed(1)} / 5</b></div><div class="compare-metric"><span>Confort acústico</span><b>${Number(c.snapshot.noise).toFixed(1)} / 5</b></div><div class="compare-metric"><span>Opiniones</span><b>${c.snapshot.count}</b></div>`:`<div class="empty-state" style="min-height:160px"><h3>Sin opiniones suficientes</h3></div>`}<div class="saved-card-actions" style="margin-top:18px"><button data-compare-open="${i}">Ver en el mapa</button><button data-compare-remove="${i}">Quitar</button></div></div>`).join('');
-  root.innerHTML=`<div class="method-banner">${icon('info')}<p>Una diferencia entre notas <strong>no prueba</strong> que una zona sea más peligrosa que otra. Las muestras, momentos y opiniones pueden ser distintos.</p></div><div class="comparison-layout">${cards}</div>`;
+  if(!state.comparison.length){
+    root.innerHTML='<div class="empty-state">'+icon('compare')+'<h3>Selecciona dos zonas para comparar</h3><p>Añade dos zonas desde su ficha en el mapa y consulta sus valoraciones en paralelo.</p><button type="button" id="goExploreCompare">Buscar zonas</button></div>';
+    EL('goExploreCompare')?.addEventListener('click',()=>changeView('explorar'));
+    return;
+  }
+  const cards=state.comparison.map((c,i)=>`<div class="compare-card"><span class="saved-pill compare-zone-pill">ZONA ${i+1}</span><h3>${sectorName(c)}</h3><p>${escapeHtml(c.city)} · captura realizada al guardar</p>${c.snapshot?`<div class="compare-number"><strong>${Number(c.snapshot.night).toFixed(1)}</strong><span>/ 5 · percepción nocturna</span></div><div class="compare-metric"><span>Percepción de día</span><b>${Number(c.snapshot.day).toFixed(1)} / 5</b></div><div class="compare-metric"><span>Iluminación</span><b>${Number(c.snapshot.light).toFixed(1)} / 5</b></div><div class="compare-metric"><span>Confort acústico</span><b>${Number(c.snapshot.noise).toFixed(1)} / 5</b></div><div class="compare-metric"><span>Opiniones</span><b>${c.snapshot.count}</b></div>`:`<div class="empty-state" style="min-height:160px"><h3>Sin opiniones aprobadas al guardar</h3></div>`}<div class="saved-card-actions" style="margin-top:18px"><button data-compare-open="${i}">Ver en el mapa</button><button data-compare-remove="${i}">Quitar</button></div></div>`).join('');
+  const placeholder=state.comparison.length===1?'<div class="compare-add-card"><span class="compare-add-symbol" aria-hidden="true">+</span><h3>Te falta una zona</h3><p>La primera zona sigue guardada. Añade otra para completar la comparación.</p><button type="button" id="goExploreCompare">Añadir segunda zona</button></div>':'';
+  root.innerHTML=`<div class="method-banner">${icon('info')}<p>Una diferencia entre notas <strong>no prueba</strong> que una zona sea más peligrosa que otra. Las muestras, momentos y opiniones pueden ser distintos.</p></div><div class="comparison-layout">${cards}${placeholder}</div>`;
+  EL('goExploreCompare')?.addEventListener('click',()=>changeView('explorar'));
   root.querySelectorAll('[data-compare-open]').forEach(btn=>btn.addEventListener('click',()=>goToSnapshot(state.comparison[Number(btn.dataset.compareOpen)])));
-  root.querySelectorAll('[data-compare-remove]').forEach(btn=>btn.addEventListener('click',()=>{state.comparison.splice(Number(btn.dataset.compareRemove),1);persist();renderComparePage();}));
+  root.querySelectorAll('[data-compare-remove]').forEach(btn=>btn.addEventListener('click',()=>{
+    const index=Number(btn.dataset.compareRemove);
+    if(!Number.isInteger(index)||index<0||index>=state.comparison.length)return;
+    state.comparison.splice(index,1);
+    persist();
+    renderComparePage();
+    toast('Zona quitada de la comparación');
+  }));
 }
 function openModal(markup){EL('modalContent').innerHTML=`<div class="modal-body">${markup}</div>`;const heading=EL('modalContent').querySelector('h2');if(heading)heading.id='modalTitle';EL('modalRoot').classList.remove('hidden');document.body.style.overflow='hidden';EL('modalContent').querySelectorAll('[data-close]').forEach(btn=>btn.addEventListener('click',closeModal));}
 function closeModal(){EL('modalRoot').classList.add('hidden');EL('modalContent').innerHTML='';document.body.style.overflow='';}
