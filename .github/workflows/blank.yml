@@ -7,6 +7,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   test:
     name: Test Node.js
@@ -26,3 +29,41 @@ jobs:
           node --check public/mobile-sheet-fix.js
       - name: Run automated tests
         run: npm test
+
+  render-package:
+    name: Sync Render static-site archive
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Build archive from current public files
+        shell: bash
+        run: |
+          set -euo pipefail
+          stage="$(mktemp -d)"
+          mkdir -p "$stage/barrioradar"
+          cp -R public "$stage/barrioradar/public"
+          # Render currently serves barrioradar/public from this ZIP rather than /public.
+          # Use stable file timestamps to avoid creating commits for identical content.
+          find "$stage/barrioradar" -depth -exec touch -t 202001010000 {} +
+          rm -f .github/workflows/barrioradar-pwa.zip
+          (cd "$stage" && zip -q -X -r "$GITHUB_WORKSPACE/.github/workflows/barrioradar-pwa.zip" barrioradar)
+          unzip -tq .github/workflows/barrioradar-pwa.zip
+          rm -rf "$stage"
+      - name: Commit updated archive for Render automatic deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -f .github/workflows/barrioradar-pwa.zip
+          if git diff --cached --quiet; then
+            echo "Render archive already matches current public files."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Sync Render static-site bundle with main"
+          git push origin HEAD:main
