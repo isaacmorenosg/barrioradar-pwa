@@ -63,7 +63,7 @@ test('startup transitions from a plain white screen to the map before showing th
  const firstPaint=html.slice(html.indexOf('<style id="zonenta-splash-critical">'),html.indexOf('</style>'));
  assert.match(firstPaint,/\.zonenta-splash\{[^}]*background:#fff/);
  assert.match(firstPaint,/\.zonenta-splash-art\{[^}]*opacity:0;animation:zonenta-map-appear/);
- assert.match(firstPaint,/\.zonenta-splash-center\{[^}]*opacity:0;animation:zonenta-logo-appear/);
+ assert.match(firstPaint,/\.zonenta-splash-brand\{[^}]*opacity:0;animation:zonenta-logo-appear/);
  assert.match(read('splash.js'),/1500-\(performance\.now\(\)-started\)/);
  assert.match(sw,/v33-white-transition/);
 });
