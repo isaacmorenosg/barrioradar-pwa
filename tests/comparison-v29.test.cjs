@@ -14,7 +14,7 @@ assert.ok(start>=0&&end>start);
 const source=app.slice(start,end);
 function harness(items){
  const calls={handlers:{},render:0,persist:0,navigate:[]};
- const root={innerHTML:'',querySelectorAll(selector){return (this.innerHTML.match(new RegExp(selector==='[data-compare-remove]'?'data-compare-remove="\\d+"':'data-compare-open="\\d+"','g'))||[]).map(match=>({dataset:{[selector==='[data-compare-remove]'?'compareRemove':'compareOpen']:match.match(/\\d+/)[0]},addEventListener(type,fn){calls.handlers[selector+':'+this.dataset[selector==='[data-compare-remove]'?'compareRemove':'compareOpen']]=fn;}}));}};
+ const root={innerHTML:'',querySelectorAll(selector){return (this.innerHTML.match(new RegExp(selector==='[data-compare-remove]'?'data-compare-remove="\\d+"':'data-compare-open="\\d+"','g'))||[]).map(match=>({dataset:{[selector==='[data-compare-remove]'?'compareRemove':'compareOpen']:match.split('"')[1]},addEventListener(type,fn){calls.handlers[selector+':'+this.dataset[selector==='[data-compare-remove]'?'compareRemove':'compareOpen']]=fn;}}));}};
  const buttons={goExploreCompare:{addEventListener(type,fn){calls.handlers.go=fn;}}};
  const state={comparison:[...items]};
  const ctx={state,EL:id=>id==='compareList'?root:buttons[id],icon:()=>'',sectorName:o=>o.name,escapeHtml:x=>x,

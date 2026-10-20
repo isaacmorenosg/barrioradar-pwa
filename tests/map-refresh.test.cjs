@@ -44,7 +44,7 @@ test('Returning from comparison schedules data loading after the view is visible
   const ctx={
     state:{view:'comparar'},
     EL:()=>({classList:{toggle(){},contains(){return false;}},setAttribute(){}}),
-    document:{querySelectorAll:()=>[]},window:{scrollTo(){}},
+    document:{querySelectorAll:()=>[],body:{classList:{toggle(){}}}},window:{scrollTo(){}},
     scheduleMapRefresh(){refreshes++;},cancelRatingsRequest(){},
     ratingsStatus(){},renderSavedPage(){},renderComparePage(){}
   };
