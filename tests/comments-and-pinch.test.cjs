@@ -26,5 +26,5 @@ test('pinch zoom uses two pointers without selecting a sector',()=>{
   assert.match(shell,/A two-finger gesture must never open the details sheet/);
 });
 test('PWA cache version is bumped for gesture and comments changes',()=>{
-  assert.match(sw,/barrioradar-pulse-mapas-v18-comments-pinch/);
+  assert.match(sw,/barrioradar-pulse-mapas-v19-sheet-fix/);
 });

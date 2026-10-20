@@ -1,5 +1,5 @@
-const SHELL='barrioradar-pulse-mapas-v18-comments-pinch';
-const ASSETS=['/','/index.html','/styles.css','/radar-dark.css','/app.js','/radar-ui.js','/config.js','/supabase-api.js','/manifest.webmanifest','/icons.svg','/icons/icon-192.png','/icons/icon-512.png'];
+const SHELL='barrioradar-pulse-mapas-v19-sheet-fix';
+const ASSETS=['/','/index.html','/styles.css','/radar-dark.css','/app.js','/radar-ui.js','/mobile-sheet-fix.css','/mobile-sheet-fix.js','/config.js','/supabase-api.js','/manifest.webmanifest','/icons.svg','/icons/icon-192.png','/icons/icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(SHELL).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==SHELL).map(k=>caches.delete(k)))),self.clients.claim()])));
 self.addEventListener('fetch',event=>{

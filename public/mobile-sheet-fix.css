@@ -1,0 +1,131 @@
+/* BarrioRadar v19: mobile sector sheet is independent from the map's gesture layer. */
+@media (max-width: 760px) {
+  body > #detailsCard.mobile-sheet-root {
+    display: block !important;
+    position: fixed !important;
+    inset: auto 0 0 !important;
+    box-sizing: border-box;
+    width: 100% !important;
+    height: 84vh !important;
+    height: 84dvh !important;
+    max-height: calc(100vh - env(safe-area-inset-top) - 8px) !important;
+    max-height: calc(100dvh - env(safe-area-inset-top) - 8px) !important;
+    min-height: 0 !important;
+    z-index: 26;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    pointer-events: none;
+    transform: translate3d(0, 103%, 0);
+    border-radius: 24px 24px 0 0;
+    scrollbar-width: thin;
+  }
+  body.sheet-open > #detailsCard.mobile-sheet-root {
+    pointer-events: auto;
+    visibility: visible;
+    transform: translate3d(0, 0, 0);
+  }
+  body.sheet-open.sheet-expanded > #detailsCard.mobile-sheet-root {
+    height: calc(100vh - env(safe-area-inset-top)) !important;
+    height: calc(100dvh - env(safe-area-inset-top)) !important;
+    max-height: calc(100dvh - env(safe-area-inset-top)) !important;
+    border-radius: 0;
+  }
+  body > #detailsCard.mobile-sheet-root .sheet-topbar {
+    display: flex;
+    position: sticky !important;
+    inset: auto !important;
+    top: 0 !important;
+    z-index: 5;
+    width: 100%;
+    height: 54px;
+    min-height: 54px;
+    box-sizing: border-box;
+    background: rgba(12, 34, 40, .98);
+    border-bottom: 1px solid #2c5255;
+    pointer-events: auto;
+    touch-action: pan-y;
+  }
+  body > #detailsCard.mobile-sheet-root #detailsContent,
+  body > #detailsCard.mobile-sheet-root .details-inner:not(:has(.empty-details)) {
+    display: block !important;
+    box-sizing: border-box;
+    width: 100%;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    flex: none !important;
+    padding: 17px 18px calc(86px + env(safe-area-inset-bottom)) !important;
+    overflow: visible !important;
+    touch-action: pan-y;
+  }
+  body > #detailsCard.mobile-sheet-root #detailsContent > * {
+    max-width: 100%;
+    min-width: 0;
+  }
+  body > #detailsCard.mobile-sheet-root .sheet-grip {
+    pointer-events: auto;
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 53px;
+    background: transparent;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  body > #detailsCard.mobile-sheet-root .sheet-grip::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    width: 46px;
+    height: 5px;
+    transform: translateX(-50%);
+    border-radius: 10px;
+    background: #8ba9aa;
+  }
+  body > #detailsCard.mobile-sheet-root .sheet-close {
+    top: 8px;
+    right: 13px;
+    width: 38px;
+    height: 38px;
+  }
+  body > #detailsCard.mobile-sheet-root #sheetExpand {
+    position: absolute;
+    top: 9px;
+    left: 14px;
+    z-index: 6;
+    min-width: 95px;
+    min-height: 36px;
+    padding: 7px 11px;
+    border: 1px solid #537874;
+    border-radius: 12px;
+    color: #eafff0;
+    background: #1a4548;
+    font-size: 12px;
+    font-weight: 750;
+    touch-action: manipulation;
+  }
+  body > #detailsCard.mobile-sheet-root .community-comments > strong {
+    color: #a2e9bd;
+    font-size: 13px;
+  }
+  body > #detailsCard.mobile-sheet-root .community-comments > p {
+    color: #e1f6eb;
+    background: #173b41;
+    border-left-color: #7be9a5;
+    line-height: 1.6;
+    font-size: 13px;
+  }
+  body > #detailsCard.mobile-sheet-root .community-comments > small {
+    color: #acc9c0;
+    font-size: 11px;
+  }
+}
+@media (min-width: 761px) {
+  #sheetExpand { display: none !important; }
+}
