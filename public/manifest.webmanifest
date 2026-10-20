@@ -11,25 +11,25 @@
   "lang": "es-ES",
   "icons": [
     {
-      "src": "/icons/zonenta-192.png",
+      "src": "/icons/zonenta-z-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/zonenta-512.png",
+      "src": "/icons/zonenta-z-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/zonenta-maskable-512.png",
+      "src": "/icons/zonenta-z-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/icons/zonenta-icon.svg",
+      "src": "/icons/zonenta-brand-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"

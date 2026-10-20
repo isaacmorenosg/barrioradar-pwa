@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 1254 1254" role="img" aria-label="Zonenta, Z blanca integrada en marcador azul marino y naranja">
+<defs>
+<linearGradient id="navy" x1=".08" y1=".1" x2=".96" y2=".96"><stop offset="0" stop-color="#0C4178"/><stop offset=".52" stop-color="#092E62"/><stop offset="1" stop-color="#061D43"/></linearGradient>
+<linearGradient id="orange" x1=".22" y1=".04" x2=".8" y2=".96"><stop offset="0" stop-color="#FF8B08"/><stop offset=".55" stop-color="#FF6B00"/><stop offset="1" stop-color="#FA4803"/></linearGradient>
+<filter id="shadow" x="-.14" y="-.14" width="1.28" height="1.38"><feGaussianBlur stdDeviation="23"/></filter>
+</defs>
+<rect width="1254" height="1254" fill="#FAFAFA"/>
+<rect x="123" y="135" width="1010" height="1030" rx="245" fill="#000" opacity=".10" filter="url(#shadow)"/>
+<rect x="100" y="104" width="1054" height="1050" rx="265" fill="#FFFFFF"/>
+<path fill="url(#navy)" d="M755,224 701,207 655,200 602,200 548,209 495,227 445,253 402,285 366,322 784,323 807,333 821,349 826,362 826,383 821,398 812,412 580,640 579,648 628,637 685,618 747,590 795,562 837,532 873,501 913,458 934,424 937,408 922,375 903,344 877,311 848,282 813,255Z M646,407 314,406 301,442 292,484 289,527 292,567 301,609 317,655 340,704 368,751 367,717 371,704 385,679 424,638 648,420 650,414Z"/>
+<path fill="url(#orange)" d="M367,724 367,742 371,757 432,841 573,1008 602,1038 617,1045 629,1045 643,1038 679,1000 818,834 827,819 834,797 835,775 828,756 814,743 795,737 426,737 406,730 390,715 384,702 384,687 387,679 372,705Z M938,410 930,435 899,476 859,515 806,556 755,587 700,613 639,635 579,650 583,654 846,654 858,656 875,664 886,675 893,688 895,712 886,738 917,687 937,646 952,602 958,572 961,543 960,498 953,457Z"/>
+</svg>

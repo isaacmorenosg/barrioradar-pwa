@@ -123,3 +123,7 @@ El logo de cabecera y escritorio se muestra como una **única imagen PNG**, `pub
 `public/assets/zonenta-opening.webp` reproduce el mapa pastel aprobado para la pantalla de inicio interna. Se desvanece al terminar de configurar la vista y, si falla algún script, tiene salida de seguridad. Las valoraciones se cargan de forma independiente.
 
 **Limitación de las PWA de Android:** el splash nativo inicial que crea Chrome no permite cambiar el icono centrado por una composición con mapa mediante el Web App Manifest. Se ha acortado el título nativo a «Zonenta» y, justo después, se muestra el splash ilustrado personalizado; la instalación conserva el mismo ID, datos y nombre corto.
+
+## Icono Zonenta v34
+
+El icono elegido, una Z blanca integrada en un marcador azul marino y naranja, tiene una única fuente vectorial en `public/icons/zonenta-brand-icon.svg`. La automatización de Render genera a partir de ella los PNG de Android (192/512/maskable), Apple (180), favicons (16/32/48 e ICO) y rutas de compatibilidad. Se utiliza también en la pantalla de bienvenida; el logotipo con lema de la cabecera permanece intacto.

@@ -27,12 +27,12 @@ test('brand colors do not overwrite sector assessment fills',()=>{
 
 test('Android installation uses updated PNG brand icons and maskable artwork',()=>{
  assert.deepEqual(manifest.icons.filter(i=>i.type==='image/png').map(i=>i.sizes),['192x192','512x512','512x512']);
- assert.ok(manifest.icons.some(i=>i.purpose==='maskable'&&i.src==='/icons/zonenta-maskable-512.png'));
+ assert.ok(manifest.icons.some(i=>i.purpose==='maskable'&&i.src==='/icons/zonenta-z-maskable-512.png'));
  for(const file of ['zonenta-192.png','zonenta-512.png','zonenta-maskable-512.png','icon-192.png','icon-512.png']){
   const bytes=readFileSync(join(__dirname,'../public/icons',file));
   assert.equal(bytes.subarray(0,4).toString('hex'),'89504e47');
  }
- assert.match(html,/rel="apple-touch-icon"[^>]+zonenta-192\.png/);
+ assert.match(html,/rel="apple-touch-icon"[^>]+zonenta-z-180\.png/);
  assert.match(sw,/zonenta-pwa-v31-brand-splash/);
 });
 
@@ -66,4 +66,19 @@ test('startup transitions from a plain white screen to the map before showing th
  assert.match(firstPaint,/\.zonenta-splash-center\{[^}]*opacity:0;animation:zonenta-logo-appear/);
  assert.match(read('splash.js'),/1500-\(performance\.now\(\)-started\)/);
  assert.match(sw,/v33-white-transition/);
+});
+
+test('selected orange and navy Z icon is used across PWA, splash and favicon',()=>{
+ const icon=read('icons/zonenta-brand-icon.svg');
+ assert.match(icon,/aria-label="Zonenta/);
+ assert.match(icon,/<path fill="url\(#navy\)"/);
+ assert.match(icon,/<path fill="url\(#orange\)"/);
+ assert.deepEqual(manifest.icons.slice(0,3).map(x=>x.src),[
+  '/icons/zonenta-z-192.png','/icons/zonenta-z-512.png','/icons/zonenta-z-maskable-512.png'
+ ]);
+ assert.match(html,/class="zonenta-splash-icon" src="data:image\/svg\+xml,/);
+ assert.match(html,/href="\/icons\/zonenta-brand-icon\.svg"/);
+ assert.match(html,/href="\/icons\/zonenta-z-32\.png"/);
+ assert.match(html,/href="\/favicon\.ico"/);
+ assert.match(sw,/zonenta-pwa-v34-z-icon/);
 });

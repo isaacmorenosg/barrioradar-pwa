@@ -6,6 +6,7 @@ on:
       - feature/zonenta-splash-lockup-v31
     paths:
       - 'public/**'
+      - 'scripts/build_zonenta_icons.py'
       - 'server.mjs'
       - 'package.json'
       - 'README.md'
@@ -19,6 +20,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: true
+      - name: Generate branded Zonenta icons
+        run: |
+          python3 -m pip install --quiet --disable-pip-version-check Pillow CairoSVG
+          python3 scripts/build_zonenta_icons.py
+          test -f public/icons/zonenta-z-192.png
+          test -f public/icons/zonenta-z-maskable-512.png
+          test -f public/favicon.ico
       - name: Rebuild Render compatibility archive
         run: |
           mkdir -p barrioradar render
@@ -34,7 +42,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add render/barrioradar-pwa.zip
+          git add render/barrioradar-pwa.zip public/icons/ public/favicon.ico
           if ! git diff --cached --quiet; then
             git commit -m "build: refresh Render ZIP for Zonenta splash"
             git push
