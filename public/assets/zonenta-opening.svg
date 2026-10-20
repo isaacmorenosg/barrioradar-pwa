@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1600" viewBox="0 0 900 1600" role="img" aria-label="Mapa ilustrado de Zonenta">
+<defs>
+<pattern id="streets" width="110" height="95" patternUnits="userSpaceOnUse" patternTransform="rotate(-19)"><path d="M0 0V95M40 0V95M78 0V95M0 0H110M0 42H110M0 75H110" fill="none" stroke="#ffffff" stroke-width="7" opacity=".9"/></pattern>
+<radialGradient id="fade"><stop offset="0.2" stop-color="#F8F9FB" stop-opacity=".92"/><stop offset=".53" stop-color="#F8F9FB" stop-opacity=".64"/><stop offset="1" stop-color="#F8F9FB" stop-opacity=".3"/></radialGradient>
+<linearGradient id="wash" x2="0" y2="1"><stop stop-color="#F8F9FB" stop-opacity=".4"/><stop offset=".45" stop-color="#F8F9FB" stop-opacity=".15"/><stop offset="1" stop-color="#F8F9FB" stop-opacity=".7"/></linearGradient>
+</defs>
+<rect width="900" height="1600" fill="#F6F6F1"/>
+<path d="M-100 1200C110 1120 160 1000 250 890S420 610 350 430 420 130 600 -60L940 30V1480L-40 1650Z" fill="#E0EEF0"/>
+<path d="M-80 1220C105 1132 189 1000 273 901S451 615 372 423 442 152 625 -60" fill="none" stroke="#ffffff" stroke-width="34"/>
+<path d="M410 0L830 45L875 490L460 470Z" fill="#DCEDE0"/>
+<path d="M0 240L330 170L520 630L65 700Z" fill="#FFF0CF"/>
+<path d="M500 1000L890 870L950 1440L635 1475Z" fill="#FFE3D7"/>
+<path d="M40 1060L295 1020L270 1410L15 1420Z" fill="#DFEBDC"/>
+<rect width="900" height="1600" fill="url(#streets)" opacity=".78"/>
+<path d="M-50 650Q250 430 560 560T950 700" fill="none" stroke="#FFF" stroke-width="24" opacity=".9"/>
+<path d="M-60 930Q330 1080 550 760T950 290" fill="none" stroke="#FFF" stroke-width="22" opacity=".83"/>
+<g opacity=".85"><circle cx="260" cy="445" r="69" fill="#F9D682" opacity=".36"/><circle cx="260" cy="445" r="24" fill="#F9CC60"/><circle cx="260" cy="445" r="8" fill="#fff"/>
+<circle cx="710" cy="315" r="66" fill="#95D4AF" opacity=".3"/><circle cx="710" cy="315" r="22" fill="#76BD91"/><circle cx="710" cy="315" r="7" fill="#fff"/>
+<circle cx="680" cy="1225" r="72" fill="#FEB9A3" opacity=".3"/><circle cx="680" cy="1225" r="22" fill="#FA977D"/><circle cx="680" cy="1225" r="7" fill="#fff"/></g>
+<rect width="900" height="1600" fill="url(#fade)"/>
+<rect width="900" height="1600" fill="url(#wash)"/>
+</svg>

@@ -1,0 +1,41 @@
+name: Sync Render PWA archive
+on:
+  push:
+    branches:
+      - main
+      - feature/zonenta-splash-lockup-v31
+    paths:
+      - 'public/**'
+      - 'server.mjs'
+      - 'package.json'
+      - 'README.md'
+      - '.github/workflows/render-bundle.yml'
+permissions:
+  contents: write
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Rebuild Render compatibility archive
+        run: |
+          mkdir -p barrioradar render
+          cp -a public barrioradar/public
+          cp server.mjs package.json README.md barrioradar/
+          rm -f render/barrioradar-pwa.zip
+          zip -q -r render/barrioradar-pwa.zip barrioradar
+          unzip -tq render/barrioradar-pwa.zip
+          test -L .github/workflows/barrioradar-pwa.zip
+          unzip -tq .github/workflows/barrioradar-pwa.zip
+          test -f barrioradar/public/splash.js
+      - name: Commit archive if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add render/barrioradar-pwa.zip
+          if ! git diff --cached --quiet; then
+            git commit -m "build: refresh Render ZIP for Zonenta splash"
+            git push
+          fi

@@ -124,5 +124,5 @@ test('Interfaz: se resuelven las coordenadas antes de centrar el mapa',()=>{
   assert.match(app,/const position=await window\.BarrioAPI\.resolvePlace\(place\)/);
   assert.doesNotMatch(app,/PRESETS\[clean\(query\.replace\(/);
   assert.match(html,/Busca cualquier ciudad o pueblo de España/);
-  assert.match(sw,/zonenta-pwa-v30-install-icons/);
+  assert.match(sw,/zonenta-pwa-v31-brand-splash/);
 });

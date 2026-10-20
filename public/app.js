@@ -761,5 +761,5 @@ function start(){
   bindUI();initMap();renderDetails();renderCounters();scheduleMapRefresh();updateAccountButton();
   if(window.BarrioAPI?.configured)window.BarrioAPI.onCommunityAuthChange(async()=>{await updateAccountButton();if(EL('emailLoginForm')&&!EL('modalRoot').classList.contains('hidden')){try{const u=await window.BarrioAPI.getCommunityUser();if(u){closeModal();toast('Correo verificado. Ya puedes opinar.');}}catch{}}});
 }
-document.addEventListener('DOMContentLoaded',start);
+document.addEventListener('DOMContentLoaded',()=>{start();window.dispatchEvent(new Event('zonenta:app-ready'));});
 })();

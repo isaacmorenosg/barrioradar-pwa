@@ -15,12 +15,14 @@
   <link rel="stylesheet" href="/mobile-sheet-fix.css">
   <link rel="stylesheet" href="/radar-light.css">
   <link rel="stylesheet" href="/zonenta-theme.css">
+  <link rel="stylesheet" href="/splash.css">
   <title>Zonenta · Conoce el lugar antes de elegirlo.</title>
 </head>
 <body class="map-view-active">
+<div class="zonenta-splash" id="zonentaSplash" role="status" aria-label="Iniciando Zonenta"><img class="zonenta-splash-art" src="/assets/zonenta-opening.svg" alt=""><img class="zonenta-splash-center" src="/icons/zonenta-lockup.svg" alt="Zonenta. Conoce el lugar antes de elegirlo."></div>
 <div class="app-shell" id="appShell">
   <aside class="sidebar" aria-label="Navegacion principal">
-    <div class="brand"><a class="zonenta-brand" href="/" aria-label="Zonenta, inicio"><img src="/icons/zonenta-wordmark.svg" width="192" height="49" alt="Zonenta."><span class="zonenta-brand-tagline">Conoce el lugar antes de elegirlo.</span></a></div>
+    <div class="brand"><a class="zonenta-brand" href="/" aria-label="Zonenta, inicio"><img src="/icons/zonenta-lockup.svg" width="188" height="67" alt="Zonenta. Conoce el lugar antes de elegirlo."></a></div>
     <div class="sidebar-section-caption">TU ESPACIO</div>
     <nav class="sidebar-nav" aria-label="Secciones">
       <button class="nav-link active" data-view="explorar"><svg class="icon"><use href="/icons.svg#compass"/></svg><span>Explorar mapa</span><span class="nav-dot"></span></button>
@@ -39,7 +41,7 @@
   </aside>
   <main class="main-content">
     <header class="topbar">
-      <div class="topbar-crumb"><a class="topbar-mobile-brand" href="/" aria-label="Zonenta, inicio"><img class="topbar-mobile-logo" src="/icons/zonenta-wordmark.svg" alt="Zonenta."><span class="topbar-mobile-tagline">Conoce el lugar antes de elegirlo.</span></a><button class="mobile-menu icon-button" id="mobileMenu" aria-label="Abrir menu"><svg class="icon"><use href="/icons.svg#menu"/></svg></button><span>Explorar España</span><svg class="icon crumb-chevron"><use href="/icons.svg#chevron-right"/></svg><strong id="crumbCity">Huelva</strong></div>
+      <div class="topbar-crumb"><a class="topbar-mobile-brand" href="/" aria-label="Zonenta, inicio"><img class="topbar-mobile-logo" src="/icons/zonenta-lockup.svg" width="150" height="53" alt="Zonenta. Conoce el lugar antes de elegirlo."></a><button class="mobile-menu icon-button" id="mobileMenu" aria-label="Abrir menu"><svg class="icon"><use href="/icons.svg#menu"/></svg></button><span>Explorar España</span><svg class="icon crumb-chevron"><use href="/icons.svg#chevron-right"/></svg><strong id="crumbCity">Huelva</strong></div>
       <div class="header-right"><span class="topbar-flag">ES <span>•</span> ESPAÑA</span><button type="button" class="header-account" id="accountButton" aria-label="Iniciar sesion o ver mi cuenta">Mi cuenta</button></div>
     </header>
     <div class="content-pad">
@@ -84,6 +86,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.74.0/dist/umd/supabase.min.js" defer></script>
 <script src="/config.js" defer></script>
 <script src="/supabase-api.js" defer></script>
+<script src="/splash.js" defer></script>
 <script src="/app.js" defer></script>
 <script src="/radar-ui.js" defer></script>
   <script src="/mobile-sheet-fix.js" defer></script>
