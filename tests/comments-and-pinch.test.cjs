@@ -26,5 +26,5 @@ test('pinch zoom uses two pointers without selecting a sector',()=>{
   assert.doesNotMatch(shell,/map\.addEventListener\('pointerup'/); // All automatic mobile sheet opens were removed.
 });
 test('PWA cache version is bumped for gesture and comments changes',()=>{
-  assert.match(sw,/barrioradar-pulse-mapas-v24-bolder-sectors/);
+  assert.match(sw,/barrioradar-pulse-mapas-v25-light-theme/);
 });
