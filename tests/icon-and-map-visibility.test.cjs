@@ -22,7 +22,7 @@ test('map simplified selection and equal-weight four metric color are preserved'
   assert.match(html,/id="mobileSheetChip"/);
 });
 test('installed PWA invalidates old icons and styles cache',()=>{
-  assert.match(sw,/zonenta-pwa-v26-branding/);
+  assert.match(sw,/zonenta-pwa-v27-mobile-header/);
   assert.match(sw,/'\/icons\.svg'/);
   assert.match(sw,/'\/radar-dark\.css'/);
 });

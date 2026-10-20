@@ -7,7 +7,14 @@ const html=read('index.html'),css=read('zonenta-theme.css'),sw=read('sw.js'),man
 test('Zonenta identity replaces public branding',()=>{
  assert.match(html,/<title>Zonenta · Conoce el lugar antes de elegirlo\.<\/title>/);
  assert.match(html,/class="zonenta-brand"/);
+ assert.match(html,/class="topbar-mobile-brand"/);
  assert.match(html,/class="topbar-mobile-logo"/);
+ assert.match(html,/class="topbar-mobile-tagline">Conoce el lugar antes de elegirlo\./);
+ assert.match(css,/\.topbar-crumb #crumbCity,\.topbar-crumb \.crumb-chevron\{display:none!important\}/);
+ assert.match(read('icons/zonenta-wordmark.svg'),/textLength="195"/);
+ assert.match(read('icons/zonenta-wordmark.svg'),/<circle cx="318" cy="61" r="8"/);
+ assert.match(html,/class="mobile-rate-cta" id="mobileRateCTA" disabled/);
+ assert.match(html,/class="mobile-sheet-chip" id="mobileSheetChip"[^>]*disabled/);
  assert.equal(manifest.short_name,'Zonenta');
  assert.equal(manifest.theme_color,'#F8F9FB');
 });
@@ -15,5 +22,5 @@ test('brand colors do not overwrite sector assessment fills',()=>{
  assert.match(css,/--zonenta-navy:#0F2D5B/);
  assert.match(css,/--zonenta-orange:#FF6B3D/);
  assert.doesNotMatch(css,/\.map-overlay polygon\s*\{[^}]*fill:/);
- assert.match(sw,/zonenta-pwa-v26-branding/);
+ assert.match(sw,/zonenta-pwa-v27-mobile-header/);
 });
