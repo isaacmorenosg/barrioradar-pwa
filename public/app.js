@@ -43,6 +43,45 @@ const icon=name=>`<svg class="icon"><use href="/icons.svg#${name}"/></svg>`;
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 const clean=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/\s+/g,' ');
 const fmtNum=n=>new Intl.NumberFormat('es-ES').format(n);
+
+const NETWORK_WAIT_MS=8000;
+let confirmedSignedOut=false;
+let ratingOpening=false;
+let accountOpening=false;
+function waitForReply(work,timeout=NETWORK_WAIT_MS){
+  let timer;
+  const deadline=new Promise((_,reject)=>{
+    timer=setTimeout(()=>{
+      const error=new Error('La conexión está tardando demasiado. Inténtalo de nuevo.');
+      error.code='REQUEST_TIMEOUT';
+      reject(error);
+    },timeout);
+  });
+  return Promise.race([Promise.resolve().then(work),deadline]).finally(()=>clearTimeout(timer));
+}
+function smallSpinner(){return '<span class="zonenta-spinner" aria-hidden="true"></span>';}
+function buttonProgress(button,label){
+  if(!button)return()=>{};
+  const original=button.innerHTML;
+  const previouslyDisabled=button.disabled;
+  button.disabled=true;
+  button.setAttribute('aria-busy','true');
+  button.innerHTML=smallSpinner()+'<span>'+escapeHtml(label)+'</span>';
+  return()=>{
+    button.innerHTML=original;
+    button.disabled=previouslyDisabled;
+    button.removeAttribute('aria-busy');
+  };
+}
+function checkingDialog(label){
+  openModal(`<div class="modal-heading"><div><div class="modal-kicker">ZONENTA</div><h2>${escapeHtml(label)}</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><div class="zonenta-checking" id="authPending" role="status" aria-live="polite">${smallSpinner()}<span>Estamos consultando tu acceso. Puedes seguir explorando el mapa cuando quieras.</span></div><div class="modal-footer"><button type="button" class="secondary-button" data-close>Cerrar</button></div>`);
+  return EL('authPending');
+}
+function checkingFailed(retry){
+  openModal(`<div class="modal-heading"><div><div class="modal-kicker">CONEXIÓN</div><h2>No pudimos comprobar tu acceso</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><p class="modal-description">La comprobación ha tardado demasiado o no ha respondido. No se han modificado tus valoraciones. Puedes reintentarlo.</p><div class="modal-footer"><button class="secondary-button" type="button" data-close>Cerrar</button><button class="primary-button" type="button" id="retryAuthCheck">Reintentar</button></div>`);
+  EL('retryAuthCheck').addEventListener('click',()=>{closeModal();retry();});
+}
+
 function safeRead(key,def){try{return JSON.parse(localStorage.getItem(key))||def;}catch{return def;}}
 function saveStore(key,value){try{localStorage.setItem(key,JSON.stringify(value));}catch{}}
 function meters(lat,lng){return{x:R*lng*Math.PI/180,y:R*Math.log(Math.tan(Math.PI/4+lat*Math.PI/360))};}
@@ -563,26 +602,46 @@ const QUESTIONS=[
 ];
 const TAGS=[['buena_iluminacion','Buena iluminación'],['poca_iluminacion','Poca iluminación'],['ambiente_tranquilo','Ambiente tranquilo'],['ruido_nocturno','Ruido nocturno'],['mucho_trafico','Tráfico intenso'],['vida_en_la_calle','Vida en la calle'],['calles_solitarias','Calles solitarias']];
 async function updateAccountButton(){
-  const btn=EL('accountButton'); if(!btn)return;
-  try {
-    const user=await window.BarrioAPI?.getCommunityUser();
+  const btn=EL('accountButton');if(!btn)return;
+  if(confirmedSignedOut){btn.textContent='Mi cuenta';return;}
+  try{
+    const user=await waitForReply(()=>window.BarrioAPI?.getCommunityUser());
+    if(confirmedSignedOut)return;
     btn.textContent=user?'Cuenta verificada':'Mi cuenta';
     btn.title=user?'Sesion iniciada con correo verificado':'Iniciar sesion con correo';
-  } catch { btn.textContent='Mi cuenta'; }
+  }catch{if(!confirmedSignedOut)btn.textContent='Mi cuenta';}
 }
-async function openAccount({fromRating=false}={}){
+async function openAccount({fromRating=false,skipLookup=false}={}){
+  if(accountOpening)return;
   if(!window.BarrioAPI?.configured){
     toast('Esta versión aún no está conectada a Supabase.');return;
   }
-  let user;
-  try { user=await window.BarrioAPI.getCommunityUser(); }
-  catch(error){ toast(error.message||'No pudimos comprobar tu cuenta.');return; }
+  let user=null;
+  if(!skipLookup&&!confirmedSignedOut){
+    accountOpening=true;
+    const pending=checkingDialog('Comprobando tu cuenta…');
+    try{user=await waitForReply(()=>window.BarrioAPI.getCommunityUser());}
+    catch(error){if(pending?.isConnected)checkingFailed(()=>openAccount({fromRating}));return;}
+    finally{accountOpening=false;}
+    if(!pending?.isConnected)return;
+  }
   if(user){
     openModal(`<div class="modal-heading"><div><div class="modal-kicker">TU CUENTA</div><h2>Correo verificado</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><p class="modal-description">Has iniciado sesión como <strong>${escapeHtml(user.email)}</strong>. Tu correo no se muestra en el mapa.</p><div class="modal-list"><div>${icon('shield')} Tus valoraciones se publican solo cuando un moderador las aprueba.</div></div><div class="modal-footer"><button class="secondary-button" id="logoutCommunity">Cerrar sesión</button><button class="primary-button" id="accountDone">${fromRating?'Continuar con la valoración':'Volver al mapa'}</button></div>`);
     EL('accountDone').addEventListener('click',()=>{closeModal();if(fromRating)openRating();});
     EL('logoutCommunity').addEventListener('click',async()=>{
-      try { await window.BarrioAPI.logoutCommunity();closeModal();await updateAccountButton();toast('Has cerrado la sesión.'); }
-      catch(error){toast(error.message||'No se pudo cerrar la sesión.');}
+      const button=EL('logoutCommunity');
+      if(!button||button.disabled)return;
+      const restore=buttonProgress(button,'Cerrando sesión…');
+      try{
+        await waitForReply(()=>window.BarrioAPI.logoutCommunity(),10000);
+        confirmedSignedOut=true;
+        closeModal();
+        const accountButton=EL('accountButton');
+        if(accountButton){accountButton.textContent='Mi cuenta';accountButton.title='Iniciar sesión con correo';}
+        toast('Has cerrado la sesión.');
+      }catch(error){
+        toast(error.code==='REQUEST_TIMEOUT'?'No se pudo confirmar el cierre de sesión. Reintenta.':(error.message||'No se pudo cerrar la sesión.'));
+      }finally{restore();}
     });
     return;
   }
@@ -609,17 +668,19 @@ async function openAccount({fromRating=false}={}){
   EL('emailLoginForm').addEventListener('submit',async e=>{
     e.preventDefault();
     const send=EL('loginSend'),status=EL('loginStatus');
-    send.disabled=true;send.textContent='Enviando enlace…';status.textContent='';
+    if(send.disabled)return;
+    const restore=buttonProgress(send,'Enviando enlace…');
+    status.textContent='';
     const email=EL('loginEmail').value.trim();
     try{
-      await window.BarrioAPI.sendLoginEmail(email);
+      await waitForReply(()=>window.BarrioAPI.sendLoginEmail(email),12000);
       EL('emailLoginForm').hidden=true;
       EL('authSentEmail').textContent=email;
       EL('authSentState').hidden=false;
       status.textContent='En cuanto pulses el enlace recibido, podrás volver a Zonenta y opinar.';
     }catch(error){
-      status.textContent=error.message||'No se pudo enviar el enlace. Inténtalo de nuevo.';
-    }finally{send.disabled=false;send.innerHTML=`Enviarme el enlace por correo ${icon('arrow-right')}`;}
+      status.textContent=error.code==='REQUEST_TIMEOUT'?'La solicitud tarda demasiado. Comprueba tu correo antes de solicitar otro enlace.':(error.message||'No se pudo enviar el enlace. Inténtalo de nuevo.');
+    }finally{restore();}
   });
   EL('changeLoginEmail').addEventListener('click',()=>{
     EL('authSentState').hidden=true;
@@ -630,14 +691,21 @@ async function openAccount({fromRating=false}={}){
 }
 
 async function openRating(){
+  if(ratingOpening)return;
   if(PREVIEW_MODE){toast('Las muestras no aceptan votos. Abre el modo real.');return;}
   if(!state.selected){toast('Primero selecciona una zona');return;}
-  // No rating controls until Supabase confirms a verified user.
   if(!window.BarrioAPI?.configured){toast('El acceso aún no está disponible.');return;}
+  // We know the session is closed after a successful sign-out: no extra request.
+  if(confirmedSignedOut){await openAccount({fromRating:true,skipLookup:true});return;}
+  ratingOpening=true;
+  const sectorId=state.selected.id;
+  const pending=checkingDialog('Comprobando acceso…');
   let verifiedUser;
-  try{verifiedUser=await window.BarrioAPI.getCommunityUser();}
-  catch(error){toast(error.message||'No pudimos comprobar tu acceso.');return;}
-  if(!verifiedUser){await openAccount({fromRating:true});return;}
+  try{verifiedUser=await waitForReply(()=>window.BarrioAPI.getCommunityUser());}
+  catch(error){if(pending?.isConnected)checkingFailed(openRating);return;}
+  finally{ratingOpening=false;}
+  if(!pending?.isConnected||state.selected?.id!==sectorId)return;
+  if(!verifiedUser){await openAccount({fromRating:true,skipLookup:true});return;}
   const selected=state.selected;
   openModal(`<div class="modal-heading"><div><div class="modal-kicker">COMPARTE TU EXPERIENCIA</div><h2>¿Cómo se vive esta zona?</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><p class="modal-description">${sectorName(selected)} · ${escapeHtml(state.city)}. Valora únicamente lo que conozcas de primera mano. No se pedirán nombres ni descripciones de personas.</p><form id="ratingForm"><div id="existingReviewNotice" class="rating-replace-notice" role="status" hidden><strong>Ya has valorado esta zona</strong><p>Al volver a enviarla, sustituirás tu valoración y comentario anteriores. Solo se conserva una valoración por cuenta y zona, y la nueva pasará otra vez por moderación.</p></div>${QUESTIONS.map(([key,label,low,high])=>`<div class="slider-group"><div class="slider-group-top"><label for="range-${key}">${label}</label><output class="slider-value" id="value-${key}">3/5</output></div><input aria-label="${label}" id="range-${key}" class="rating-slider" name="${key}" type="range" min="1" max="5" step="1" value="3"><div class="slider-tips"><span>${low}</span><span>${high}</span></div></div>`).join('')}<div class="detail-section-title">¿Qué destacarías? <span style="font-weight:500;color:#94a79a">(opcional, máximo 4)</span></div><div class="tag-options">${TAGS.map(([key,label])=>`<label><input type="checkbox" name="tags" value="${key}">${label}</label>`).join('')}</div><div class="rating-comment-field"><label for="ratingComment">Cuenta tu experiencia <span>(opcional)</span></label><textarea id="ratingComment" name="comment" rows="4" maxlength="500" placeholder="¿Qué te gusta de esta zona o qué mejorarías? Cuéntalo sin identificar a otras personas."></textarea><div class="rating-comment-hint"><span>No incluyas nombres, direcciones concretas, datos privados ni acusaciones sobre personas. El mensaje se revisará antes de publicarse.</span><output id="ratingCommentCount" aria-live="polite">0 / 500</output></div></div><div id="replaceReviewConfirm" class="rating-replace-confirm" role="group" aria-label="Confirmar actualización de valoración" hidden><strong>¿Quieres sustituir tu valoración anterior?</strong><p>Se reemplazarán las puntuaciones, etiquetas y comentario guardados de esta zona. La nueva valoración volverá a moderación.</p><div class="rating-replace-buttons"><button type="button" class="secondary-button" id="cancelReplaceReview">Conservar anterior</button><button type="button" class="primary-button" id="confirmReplaceReview">Sí, actualizar valoración</button></div></div><p class="rating-submit-error" id="ratingSubmitError" role="alert" hidden></p><div class="modal-footer"><button type="button" class="secondary-button" data-close>Cerrar</button><button type="submit" class="primary-button" id="sendRating">Enviar valoración ${icon('arrow-right')}</button></div><p class="modal-caption">Las contribuciones pasan por moderación. Puedes valorar tantas zonas como quieras y actualizar cada valoración las veces que necesites (con una pausa de 2 minutos entre cambios). Solo se mantiene una por cuenta y zona, y cada cambio requiere moderación. Solo aceptamos cuentas con correo verificado. Evita compartir datos personales.</p></form>`);
   const form=EL('ratingForm');
