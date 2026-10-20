@@ -34,5 +34,5 @@ test('selected sector retains localized opinion count while map remains unclutte
 });
 test('color legend explains composite average and the offline shell changes',()=>{
  assert.match(app,/25 % cada indicador/);
- assert.match(sw,/barrioradar-pulse-mapas-v22-map-visibility-account/);
+ assert.match(sw,/barrioradar-pulse-mapas-v23-rating-confirm/);
 });

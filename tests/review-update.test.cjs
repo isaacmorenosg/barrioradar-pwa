@@ -24,13 +24,14 @@ function makeApi({verified=true, present=false, malformed=false}={}) {
  return {API:context.window.BarrioAPI,calls};
 }
 async function main(){
- test('PWA cache version bumped',()=>assert.match(sw,/barrioradar-pulse-mapas-v22-map-visibility-account/));
+ test('PWA cache version bumped',()=>assert.match(sw,/barrioradar-pulse-mapas-v23-rating-confirm/));
  test('New sector form describes unlimited reviews',()=>assert.match(app,/Puedes valorar tantas zonas como quieras/));
  test('Existing sector message informs about replacing previous',()=>assert.match(app,/Ya has valorado esta zona/));
  test('Existing sector message remains hidden initially',()=>assert.match(app,/id="existingReviewNotice"[^>]+hidden/));
  test('Submit rechecks server immediately before sending',()=>assert.ok(app.lastIndexOf('BarrioAPI.hasMyReview(selected.id)') < app.indexOf('BarrioAPI.sendReview({...values')));
- test('Submit requires user consent before overwriting',()=>assert.match(app,/if \(await window\.BarrioAPI\.hasMyReview\(selected\.id\)\)\s*\{\s*const confirmed = window\.confirm/));
+ test('Submit requires integrated user consent before overwriting',()=>{assert.match(app,/if \(await window\.BarrioAPI\.hasMyReview\(selected\.id\)\)/);assert.match(app,/id="replaceReviewConfirm"/);assert.match(app,/id="confirmReplaceReview"/);assert.doesNotMatch(app,/window\.confirm\(/);});
  test('Cancelled edit preserves existing record',()=>assert.match(app,/if \(!confirmed\)[\s\S]*?return;/));
+  test('Inline errors remain visible to the user',()=>assert.match(app,/id="ratingSubmitError" role="alert"/));
  test('Review text remains optional, max 500 characters',()=>assert.match(app,/name="comment"[^>]*maxlength="500"/));
  test('Check does not disclose another email or user review content',()=>assert.doesNotMatch(api,/getClient\(\)\.from\('br_reviews'\)/));
  let x=makeApi({present:true});

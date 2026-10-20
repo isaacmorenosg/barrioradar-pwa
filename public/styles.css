@@ -58,3 +58,10 @@
 .auth-sent p{font-size:12px;line-height:1.65;color:#3c694d;margin:9px 0}
 .auth-sent button{margin-top:6px;padding:11px 15px}
 .auth-status{font-size:12px;line-height:1.5;color:#426a51;margin-top:12px}
+/* Integrated replacement consent: works in Android PWAs without native confirm dialogs. */
+.rating-replace-confirm:not([hidden]){background:#fff7e8;border:1px solid #e7be77;color:#63400a;border-radius:12px;padding:14px;margin:16px 0;}
+.rating-replace-confirm strong{display:block;font-size:14px;margin-bottom:6px}
+.rating-replace-confirm p{font-size:12px;line-height:1.5;margin-bottom:12px}
+.rating-replace-buttons{display:flex;flex-wrap:wrap;gap:8px}
+.rating-replace-buttons button{flex:1;min-width:130px;padding:8px 12px}
+.rating-submit-error:not([hidden]){color:#a13030;background:#fff0f0;border:1px solid #e6abab;padding:12px;border-radius:10px;margin:12px 0;font-size:12px;line-height:1.5;overflow-wrap:anywhere}

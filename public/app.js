@@ -552,7 +552,7 @@ async function openRating(){
   catch(error){toast(error.message||'No pudimos comprobar tu acceso.');return;}
   if(!verifiedUser){await openAccount({fromRating:true});return;}
   const selected=state.selected;
-  openModal(`<div class="modal-heading"><div><div class="modal-kicker">COMPARTE TU EXPERIENCIA</div><h2>¿Cómo se vive esta zona?</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><p class="modal-description">${sectorName(selected)} · ${escapeHtml(state.city)}. Valora únicamente lo que conozcas de primera mano. No se pedirán nombres ni descripciones de personas.</p><form id="ratingForm"><div id="existingReviewNotice" class="rating-replace-notice" role="status" hidden><strong>Ya has valorado esta zona</strong><p>Al volver a enviarla, sustituirás tu valoración y comentario anteriores. Solo se conserva una valoración por cuenta y zona, y la nueva pasará otra vez por moderación.</p></div>${QUESTIONS.map(([key,label,low,high])=>`<div class="slider-group"><div class="slider-group-top"><label for="range-${key}">${label}</label><output class="slider-value" id="value-${key}">3/5</output></div><input aria-label="${label}" id="range-${key}" class="rating-slider" name="${key}" type="range" min="1" max="5" step="1" value="3"><div class="slider-tips"><span>${low}</span><span>${high}</span></div></div>`).join('')}<div class="detail-section-title">¿Qué destacarías? <span style="font-weight:500;color:#94a79a">(opcional, máximo 4)</span></div><div class="tag-options">${TAGS.map(([key,label])=>`<label><input type="checkbox" name="tags" value="${key}">${label}</label>`).join('')}</div><div class="rating-comment-field"><label for="ratingComment">Cuenta tu experiencia <span>(opcional)</span></label><textarea id="ratingComment" name="comment" rows="4" maxlength="500" placeholder="¿Qué te gusta de esta zona o qué mejorarías? Cuéntalo sin identificar a otras personas."></textarea><div class="rating-comment-hint"><span>No incluyas nombres, direcciones concretas, datos privados ni acusaciones sobre personas. El mensaje se revisará antes de publicarse.</span><output id="ratingCommentCount" aria-live="polite">0 / 500</output></div></div><div class="modal-footer"><button type="button" class="secondary-button" data-close>Cerrar</button><button type="submit" class="primary-button" id="sendRating">Enviar valoración ${icon('arrow-right')}</button></div><p class="modal-caption">Las contribuciones pasan por moderación. Puedes valorar tantas zonas como quieras y actualizar cada valoración las veces que necesites (con una pausa de 2 minutos entre cambios). Solo se mantiene una por cuenta y zona, y cada cambio requiere moderación. Solo aceptamos cuentas con correo verificado. Evita compartir datos personales.</p></form>`);
+  openModal(`<div class="modal-heading"><div><div class="modal-kicker">COMPARTE TU EXPERIENCIA</div><h2>¿Cómo se vive esta zona?</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><p class="modal-description">${sectorName(selected)} · ${escapeHtml(state.city)}. Valora únicamente lo que conozcas de primera mano. No se pedirán nombres ni descripciones de personas.</p><form id="ratingForm"><div id="existingReviewNotice" class="rating-replace-notice" role="status" hidden><strong>Ya has valorado esta zona</strong><p>Al volver a enviarla, sustituirás tu valoración y comentario anteriores. Solo se conserva una valoración por cuenta y zona, y la nueva pasará otra vez por moderación.</p></div>${QUESTIONS.map(([key,label,low,high])=>`<div class="slider-group"><div class="slider-group-top"><label for="range-${key}">${label}</label><output class="slider-value" id="value-${key}">3/5</output></div><input aria-label="${label}" id="range-${key}" class="rating-slider" name="${key}" type="range" min="1" max="5" step="1" value="3"><div class="slider-tips"><span>${low}</span><span>${high}</span></div></div>`).join('')}<div class="detail-section-title">¿Qué destacarías? <span style="font-weight:500;color:#94a79a">(opcional, máximo 4)</span></div><div class="tag-options">${TAGS.map(([key,label])=>`<label><input type="checkbox" name="tags" value="${key}">${label}</label>`).join('')}</div><div class="rating-comment-field"><label for="ratingComment">Cuenta tu experiencia <span>(opcional)</span></label><textarea id="ratingComment" name="comment" rows="4" maxlength="500" placeholder="¿Qué te gusta de esta zona o qué mejorarías? Cuéntalo sin identificar a otras personas."></textarea><div class="rating-comment-hint"><span>No incluyas nombres, direcciones concretas, datos privados ni acusaciones sobre personas. El mensaje se revisará antes de publicarse.</span><output id="ratingCommentCount" aria-live="polite">0 / 500</output></div></div><div id="replaceReviewConfirm" class="rating-replace-confirm" role="group" aria-label="Confirmar actualización de valoración" hidden><strong>¿Quieres sustituir tu valoración anterior?</strong><p>Se reemplazarán las puntuaciones, etiquetas y comentario guardados de esta zona. La nueva valoración volverá a moderación.</p><div class="rating-replace-buttons"><button type="button" class="secondary-button" id="cancelReplaceReview">Conservar anterior</button><button type="button" class="primary-button" id="confirmReplaceReview">Sí, actualizar valoración</button></div></div><p class="rating-submit-error" id="ratingSubmitError" role="alert" hidden></p><div class="modal-footer"><button type="button" class="secondary-button" data-close>Cerrar</button><button type="submit" class="primary-button" id="sendRating">Enviar valoración ${icon('arrow-right')}</button></div><p class="modal-caption">Las contribuciones pasan por moderación. Puedes valorar tantas zonas como quieras y actualizar cada valoración las veces que necesites (con una pausa de 2 minutos entre cambios). Solo se mantiene una por cuenta y zona, y cada cambio requiere moderación. Solo aceptamos cuentas con correo verificado. Evita compartir datos personales.</p></form>`);
   const form=EL('ratingForm');
   for(const [key] of QUESTIONS){form.querySelector(`#range-${key}`).addEventListener('input',e=>EL(`value-${key}`).textContent=e.target.value+'/5');}
   form.querySelectorAll('[name=tags]').forEach(el=>el.addEventListener('change',e=>{if(form.querySelectorAll('[name=tags]:checked').length>4){e.target.checked=false;toast('Selecciona como máximo cuatro aspectos');}}));
@@ -572,7 +572,7 @@ async function openRating(){
   })();
   form.querySelectorAll('[data-close]').forEach(btn=>btn.addEventListener('click',closeModal));
   form.addEventListener('submit',async e=>{
-    e.preventDefault();const btn=EL('sendRating');btn.disabled=true;btn.textContent='Enviando…';
+    e.preventDefault();const btn=EL('sendRating');if(btn.disabled)return;EL('ratingSubmitError').hidden=true;btn.disabled=true;btn.textContent='Enviando…';
     const values=Object.fromEntries(QUESTIONS.map(([key])=>[key,Number(form.elements[key].value)]));
     const tags=Array.from(form.querySelectorAll('[name=tags]:checked')).map(el=>el.value);
     const comment=form.elements.comment.value.trim();
@@ -586,16 +586,35 @@ async function openRating(){
         throw loginError;
       }
       if (await window.BarrioAPI.hasMyReview(selected.id)) {
-        const confirmed = window.confirm('Ya tienes una valoración de esta zona.\n\nSi continúas, sustituiremos tu puntuación, etiquetas y comentario anteriores. La nueva valoración quedará pendiente de moderación.\n\n¿Quieres reemplazar tu valoración anterior?');
+        const confirmed = await new Promise(resolve => {
+          const notice = EL('replaceReviewConfirm');
+          const keep = EL('cancelReplaceReview');
+          const replace = EL('confirmReplaceReview');
+          const finish = decision => {
+            keep.removeEventListener('click', cancel);
+            replace.removeEventListener('click', accept);
+            notice.hidden = true;
+            resolve(decision);
+          };
+          const cancel = () => finish(false);
+          const accept = () => finish(true);
+          notice.hidden = false;
+          keep.addEventListener('click', cancel, {once:true});
+          replace.addEventListener('click', accept, {once:true});
+          keep.focus({preventScroll:true});
+          notice.scrollIntoView({block:'nearest',behavior:'smooth'});
+        });
         if (!confirmed) {
           toast('Se ha conservado tu valoración anterior.');
           return;
         }
+        // Do not send after the modal/form has been closed while awaiting confirmation.
+        if (!form.isConnected) return;
       }
       await window.BarrioAPI.sendReview({...values,lat:selected.lat,lng:selected.lng,cellId:selected.id,tags,comment});
       openModal(`<div class="modal-heading"><div><div class="modal-kicker">APORTACIÓN RECIBIDA</div><h2>Gracias por compartir.</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><div class="success-card"><div class="success-icon">${icon('check')}</div><h3>Tu opinión está en revisión</h3><p>Se mostrará en el mapa en cuanto un moderador la apruebe, aunque sea la primera opinión del sector. Se indicará que es una muestra muy limitada.</p><button class="primary-button" id="closeSuccess" style="width:100%">Volver al mapa</button></div>`);
       EL('closeSuccess').addEventListener('click',closeModal);
-    }catch(error){if(error.code==='LOGIN_REQUIRED'){await openAccount({fromRating:true});}else{toast(error.message||'Error de conexion');}btn.disabled=false;btn.innerHTML=`Enviar valoración ${icon('arrow-right')}`;}
+    }catch(error){if(error.code==='LOGIN_REQUIRED'){await openAccount({fromRating:true});}else{const message=error.message||'No se pudo enviar la valoración. Inténtalo de nuevo.';const messageBox=EL('ratingSubmitError');if(messageBox?.isConnected){messageBox.textContent=message;messageBox.hidden=false;}toast(message);}btn.disabled=false;btn.innerHTML=`Enviar valoración ${icon('arrow-right')}`;}
     finally {
       // A cancelled confirmation must leave the form usable.
       if (btn.isConnected) {
