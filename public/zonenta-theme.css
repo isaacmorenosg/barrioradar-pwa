@@ -269,3 +269,52 @@ html,body,.app-shell,.main-content{background:#F8F9FB!important;color:var(--ink)
 .zonenta-brand img{display:block;width:188px;max-width:100%;height:auto}
 @media(max-width:760px){.topbar-mobile-brand .topbar-mobile-logo{width:150px;max-width:100%;height:auto}}
 @media(max-width:360px){.topbar-mobile-brand .topbar-mobile-logo{width:136px;height:auto}}
+
+
+/* v37: one discreet and accessible progress indicator for all remote actions. */
+button.zonenta-busy{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  cursor:progress!important;
+  opacity:1!important;
+  filter:none!important;
+}
+.zonenta-busy-label{white-space:nowrap}
+.zonenta-spinner{
+  display:inline-block;
+  width:15px;
+  height:15px;
+  flex:0 0 15px;
+  border:2px solid currentColor;
+  border-right-color:transparent;
+  border-radius:50%;
+  animation:zonenta-spinner-rotate .75s linear infinite;
+}
+@keyframes zonenta-spinner-rotate{to{transform:rotate(360deg)}}
+.review-check-status[hidden]{display:none!important}
+.review-check-status{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  background:#F4F7FB;
+  border:1px solid #DEE7F2;
+  color:#415C7B;
+  border-radius:10px;
+  padding:11px 12px;
+  margin:0 0 17px;
+  font-size:12px;
+  font-weight:650;
+  line-height:1.4;
+}
+.review-check-status .zonenta-spinner{color:#CA451D}
+.zonenta-inline-loading{display:inline-flex;align-items:center;gap:6px;white-space:normal}
+.zonenta-inline-loading .zonenta-spinner{width:12px;height:12px;flex-basis:12px;border-width:1.8px;color:#CA451D}
+@media(max-width:760px){
+  .search-field button.zonenta-busy .zonenta-busy-label,
+  .map-tools button.zonenta-busy .zonenta-busy-label{display:none}
+  .topbar .header-account.zonenta-busy{font-size:10px}
+  .mobile-rate-cta.zonenta-busy{opacity:1!important}
+}
+@media(prefers-reduced-motion:reduce){.zonenta-spinner{animation:none;border-right-color:currentColor}}
