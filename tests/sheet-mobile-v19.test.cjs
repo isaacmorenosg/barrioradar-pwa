@@ -34,7 +34,7 @@ test('expand, shrink and close keep independent controls', () => {
   assert.match(html, /id="sheetClose"/);
 });
 test('the service worker preloads new files and invalidates prior cache', () => {
-  assert.match(sw, /barrioradar-pulse-mapas-v19-sheet-fix/);
+  assert.match(sw, /barrioradar-pulse-mapas-v20-map-selection-legend/);
   assert.match(sw, /'\/mobile-sheet-fix.css'/);
   assert.match(sw, /'\/mobile-sheet-fix.js'/);
 });

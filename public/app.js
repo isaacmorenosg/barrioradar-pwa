@@ -99,7 +99,7 @@ function migrateSavedSectors(){
 }
 migrateSavedSectors();
 
-const state={city:'Huelva',center:{lat:37.2614,lng:-6.9447},zoom:14,mode:'night',realCells:[],selected:null,saved:safeRead('br_saved_v2',[]).filter(i=>!i.demo).map(i=>({...i,snapshot:null})),comparison:safeRead('br_compare_v2',[]).filter(i=>!i.demo).map(i=>({...i,snapshot:null})),view:'explorar',deferredInstall:null};
+const state={city:'Huelva',center:{lat:37.2614,lng:-6.9447},zoom:14,mode:'night',realCells:[],selected:null,saved:safeRead('br_saved_v2',[]).filter(i=>!i.demo).map(i=>({...i,snapshot:null})),comparison:safeRead('br_compare_v2',[]).filter(i=>!i.demo).map(i=>({...i,snapshot:null})),view:'explorar',userSelected:false,deferredInstall:null};
 const map={viewport:null,tiles:null,overlay:null,w:0,h:0,drag:null,readSeq:0};
 const commentsView={cellId:null,items:[],total:0,loaded:false,loading:false,error:false,seq:0};
 let toastTimer=0;
@@ -153,9 +153,13 @@ function overlayRender(){
     const tone=scoreColor(currentScore(c));
     const isSelected=c.id===state.selected?.id;
     out+=`<polygon data-cell="${c.id}" points="${hexPoints(c)}" fill="${tone.fill}" fill-opacity="${isSelected?.79:(!PREVIEW_MODE&&c.count<5?.38:.58)}" stroke="${isSelected?'#20533e':tone.stroke}" stroke-width="${isSelected?2.5:1.4}" stroke-opacity=".9" stroke-dasharray="${!PREVIEW_MODE&&c.count<5?'5 4':'none'}"/>`;
-    if(state.zoom>=14.5)out+=`<text class="polygon-count" x="${cp.x.toFixed(1)}" y="${(cp.y+4).toFixed(1)}" text-anchor="middle">${c.count}</text>`;
+    if(state.zoom>=14 || (isSelected&&state.userSelected)){
+      const label=String(c.count),badgeWidth=Math.max(20,11+label.length*7);
+      out+=`<rect class="polygon-count-bg${isSelected?' selected':''}" x="${(cp.x-badgeWidth/2).toFixed(1)}" y="${(cp.y-10).toFixed(1)}" width="${badgeWidth}" height="19" rx="9.5"/>`;
+      out+=`<text class="polygon-count" x="${cp.x.toFixed(1)}" y="${(cp.y+4).toFixed(1)}" text-anchor="middle">${label}</text>`;
+    }
   }
-  if(state.selected){out+=`<polygon class="selected-ring" points="${hexPoints(state.selected)}"/>`;}
+  if(state.selected&&(state.userSelected||window.innerWidth>760)){out+=`<polygon class="selected-ring" points="${hexPoints(state.selected)}"/>`;}
   map.overlay.innerHTML=out;
 }
 function renderAllMap(){tileRender();overlayRender();}
@@ -234,7 +238,7 @@ function initMap(){
       renderAllMap();refreshRealData();
     } else {
       const loc=pointerToCoord(positionFromPointer(e));
-      if(loc.lat>=27&&loc.lat<=44.5&&loc.lng>=-18.5&&loc.lng<=5){state.selected=cellAt(loc.lat,loc.lng);overlayRender();renderDetails();}
+      if(loc.lat>=27&&loc.lat<=44.5&&loc.lng>=-18.5&&loc.lng<=5){state.selected=cellAt(loc.lat,loc.lng);state.userSelected=true;overlayRender();renderDetails();}
     }
   };
   map.viewport.addEventListener('pointerup',endDrag);
@@ -243,7 +247,7 @@ function initMap(){
   map.viewport.addEventListener('keydown',e=>{
     if(e.key==='+'||e.key==='='){e.preventDefault();changeZoom(1);return;}
     if(e.key==='-'){e.preventDefault();changeZoom(-1);return;}
-    if(e.key==='Enter'){e.preventDefault();state.selected=cellAt(state.center.lat,state.center.lng);overlayRender();renderDetails();return;}
+    if(e.key==='Enter'){e.preventDefault();state.selected=cellAt(state.center.lat,state.center.lng);state.userSelected=true;overlayRender();renderDetails();return;}
     const directions={ArrowLeft:[-90,0],ArrowRight:[90,0],ArrowUp:[0,-90],ArrowDown:[0,90]};
     if(directions[e.key]){e.preventDefault();const [dx,dy]=directions[e.key];const center=toPx(state.center.lat,state.center.lng,state.zoom);state.center=pxToLL(center.x+dx,center.y+dy,state.zoom);renderAllMap();refreshRealData();}
   });
@@ -286,7 +290,25 @@ function currentSnapshot(){
   if(!c)return null;
   return {...c,city:state.city,demo:PREVIEW_MODE,snapshot:rec?{count:rec.count,day:rec.day,night:rec.night,light:rec.light,noise:rec.noise}:null,savedAt:Date.now()};
 }
+function updateMobileSelection(){
+  const chip=EL('mobileSheetChip'),info=EL('mobileSectorPreview'),badge=EL('mobileSheetCount');
+  if(!chip||!info||!badge)return;
+  const chosen=Boolean(state.userSelected&&state.selected);
+  info.hidden=!chosen;
+  chip.disabled=!chosen;
+  const share=EL('mobileRateCTA');
+  if(share)share.disabled=!chosen;
+  badge.hidden=!chosen;
+  if(!chosen){chip.setAttribute('aria-label','Selecciona primero una zona del mapa');return;}
+  const count=Math.max(0,Number(selectedRecord()?.count)||0);
+  const countLabel=count===1?'1 opinión aprobada':`${fmtNum(count)} opiniones aprobadas`;
+  EL('mobileSelectedSector').textContent=sectorName(state.selected);
+  EL('mobileSelectedOpinions').textContent=countLabel;
+  badge.textContent=fmtNum(count);
+  chip.setAttribute('aria-label',`Ver ${sectorName(state.selected)}: ${countLabel}`);
+}
 function renderDetails(){
+  updateMobileSelection();
   const root=EL('detailsContent');
   const c=state.selected,record=selectedRecord();
   if(commentsView.cellId!==(c?.id||null)){
@@ -360,7 +382,7 @@ function toggleCompare(){
 }
 function chooseLocation(place,zoom=14){
   state.city=place.name;state.center={lat:Number(place.lat),lng:Number(place.lng)};state.zoom=zoom;
-  state.selected=cellAt(state.center.lat,state.center.lng);state.realCells=[];
+  state.selected=cellAt(state.center.lat,state.center.lng);state.userSelected=false;state.realCells=[];
   syncCityLabels();
   EL('placeSearch').value='';
   changeView('explorar');
@@ -435,7 +457,7 @@ function goToSnapshot(item){
   if(!item)return;
 
   chooseLocation({name:item.city,lat:item.lat,lng:item.lng},14);
-  state.selected=cell(item.q,item.r);renderDetails();overlayRender();renderCounters();
+  state.selected=cell(item.q,item.r);state.userSelected=true;renderDetails();overlayRender();renderCounters();
 }
 function renderComparePage(){
   const root=EL('compareList');if(!root)return;

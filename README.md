@@ -85,3 +85,9 @@ La migración SQL está documentada en `supabase/migrations/20261020_paginated_s
 La ficha de sector en pantallas de hasta 760 px se mueve al nivel superior del documento, fuera de la capa del mapa que interceptaba el gesto táctil. La ficha completa es ahora un único contenedor con scroll vertical natural, la barra de cierre permanece fija y se puede pulsar **Ampliar** para ocupar toda la pantalla (o **Reducir** para volver al tamaño inicial). La barra superior admite un gesto hacia arriba/abajo para ampliar/reducir. En escritorio la ficha se devuelve a su posición original. El JavaScript y CSS de esta corrección se sirven desde `public/mobile-sheet-fix.js` y `.css` y se precargan con el service worker v19.
 
 Validación visual y táctil: Chromium móvil simulado en 320×568, 360×760 y 393×852; scroll táctil nativo comprobado en 360×760, contenido final visible, botones Ampliar/Reducir/Cerrar y restauración de la ubicación de la ficha en escritorio.
+
+## Mapa móvil: selecciona primero, abre después (v20)
+
+La leyenda de colores permanece siempre visible **encima de** los créditos de OpenStreetMap y CartoCiudad. El botón «Colores» ya no existe. Los sectores con valoraciones muestran el número de opiniones desde el zoom inicial 14.
+
+En móvil, tocar una zona **solo la resalta** y revela su identificador y el total de opiniones aprobadas en un resumen visible sobre el mapa. La ficha de puntuaciones se abre únicamente al pulsar «Ver zona», que además lleva una insignia con ese total. Los botones de ver y compartir se mantienen deshabilitados hasta elegir expresamente un sector; al buscar otra localidad, se limpia la selección anterior. Los gestos de pinza siguen funcionando. La caché PWA se incrementa a v20.
