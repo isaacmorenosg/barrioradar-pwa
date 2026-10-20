@@ -36,7 +36,7 @@ test('Android installation uses updated PNG brand icons and maskable artwork',()
  assert.match(sw,/zonenta-pwa-v31-brand-splash/);
 });
 
-test('splash and header use a complete logo image',()=>{assert.match(html,/id="zonentaSplash"/);assert.match(html,/zonenta-opening\.svg/);assert.match(html,/zonenta-lockup\.svg/);assert.match(read('splash.js'),/zonenta:app-ready/);assert.equal(manifest.name,'Zonenta');});
+test('splash and header use a complete logo image',()=>{assert.match(html,/id="zonentaSplash"/);assert.match(html,/class="zonenta-splash-art" src="data:image\/svg\+xml,/);assert.match(html,/class="zonenta-splash-center" src="data:image\/svg\+xml,/);assert.match(read('splash.js'),/zonenta:app-ready/);assert.equal(manifest.name,'Zonenta');});
 
 test('orange dot does not touch the last letter at small sizes',()=>{
  const lockup=read('icons/zonenta-lockup.svg');
