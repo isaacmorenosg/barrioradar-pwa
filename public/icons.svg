@@ -27,4 +27,5 @@
 <symbol id="bell" viewBox="0 0 24 24"><path d="M5 17h14l-2-3V9a5 5 0 0 0-10 0v5zM10 20h4"/></symbol>
 <symbol id="heart" viewBox="0 0 24 24"><path d="M20 9c0 5-8 11-8 11S4 14 4 9a5 5 0 0 1 8-3 5 5 0 0 1 8 3Z"/></symbol>
 <symbol id="sparkles" viewBox="0 0 24 24"><path d="m12 2 2.1 6.9L21 11l-6.9 2.1L12 20l-2.1-6.9L3 11l6.9-2.1zM20 18v4m-2-2h4"/></symbol>
+<symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21v-2a7.5 7.5 0 0 1 15 0v2"/></symbol>
 </svg>

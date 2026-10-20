@@ -99,3 +99,7 @@ El mapa muestra solamente los colores de los sectores, sin cifras encima de los 
 El selector Día/Noche se elimina. Los colores se determinan mediante una **media aritmética con cuatro pesos iguales (25 % cada uno)**: seguridad percibida de día, de noche, iluminación y confort acústico. La ficha presenta los cuatro indicadores al mismo nivel y deja de destacar un único valor en un círculo. El color es una percepción subjetiva agregada y no una estadística oficial de delincuencia.
 
 La consulta pública, la moderación, las valoraciones y comentarios existentes en Supabase, los controles táctiles y la leyenda visible junto a los créditos del mapa se conservan. El service worker v21 invalida la interfaz anterior.
+
+## Legibilidad del mapa e icono de cuenta (v22)
+
+La simplificación v21 ya muestra la media de cuatro percepciones para el color, los recuentos de opiniones únicamente en el resumen del sector y la apertura explícita mediante «Ver zona». En v22 se añade el símbolo `user` al sprite SVG (soluciona el icono ausente de «Cuenta») y se aligera el filtro de las teselas de OpenStreetMap: brillo 0,88 en escritorio y 0,86 en móvil (antes 0,55 y 0,48 respectivamente). Se conserva el tema oscuro en controles y fichas. Se invalida la caché mediante el service worker v22 y se añaden pruebas de regresión.
