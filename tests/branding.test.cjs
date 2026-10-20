@@ -22,7 +22,7 @@ test('brand colors do not overwrite sector assessment fills',()=>{
  assert.match(css,/--zonenta-navy:#0F2D5B/);
  assert.match(css,/--zonenta-orange:#FF6B3D/);
  assert.doesNotMatch(css,/\.map-overlay polygon\s*\{[^}]*fill:/);
- assert.match(sw,/zonenta-pwa-v34-z-icon/);
+ assert.match(sw,/zonenta-pwa-v35-original-splash/);
 });
 
 test('Android installation uses updated PNG brand icons and maskable artwork',()=>{
@@ -33,7 +33,7 @@ test('Android installation uses updated PNG brand icons and maskable artwork',()
   assert.equal(bytes.subarray(0,4).toString('hex'),'89504e47');
  }
  assert.match(html,/rel="apple-touch-icon"[^>]+zonenta-z-180\.png/);
- assert.match(sw,/zonenta-pwa-v34-z-icon/);
+ assert.match(sw,/zonenta-pwa-v35-original-splash/);
 });
 
 test('splash and header use a complete logo image',()=>{assert.match(html,/id="zonentaSplash"/);assert.match(html,/class="zonenta-splash-art" src="data:image\/svg\+xml,/);assert.match(html,/class="zonenta-splash-center" src="data:image\/svg\+xml,/);assert.match(read('splash.js'),/zonenta:app-ready/);assert.equal(manifest.name,'Zonenta');});
@@ -63,9 +63,9 @@ test('startup transitions from a plain white screen to the map before showing th
  const firstPaint=html.slice(html.indexOf('<style id="zonenta-splash-critical">'),html.indexOf('</style>'));
  assert.match(firstPaint,/\.zonenta-splash\{[^}]*background:#fff/);
  assert.match(firstPaint,/\.zonenta-splash-art\{[^}]*opacity:0;animation:zonenta-map-appear/);
- assert.match(firstPaint,/\.zonenta-splash-brand\{[^}]*opacity:0;animation:zonenta-logo-appear/);
+ assert.match(firstPaint,/\.zonenta-splash-center\{[^}]*opacity:0;animation:zonenta-logo-appear/);
  assert.match(read('splash.js'),/1500-\(performance\.now\(\)-started\)/);
- assert.match(sw,/zonenta-pwa-v34-z-icon/);
+ assert.match(sw,/zonenta-pwa-v35-original-splash/);
 });
 
 test('selected orange and navy Z icon is used across PWA, splash and favicon',()=>{
@@ -76,9 +76,10 @@ test('selected orange and navy Z icon is used across PWA, splash and favicon',()
  assert.deepEqual(manifest.icons.slice(0,3).map(x=>x.src),[
   '/icons/zonenta-z-192.png','/icons/zonenta-z-512.png','/icons/zonenta-z-maskable-512.png'
  ]);
- assert.match(html,/class="zonenta-splash-icon" src="data:image\/svg\+xml,/);
+ assert.doesNotMatch(html,/class="zonenta-splash-icon"|class="zonenta-splash-brand"/);
+ assert.match(html,/class="zonenta-splash-center" src="data:image\/svg\+xml,/);
  assert.match(html,/href="\/icons\/zonenta-brand-icon\.svg"/);
  assert.match(html,/href="\/icons\/zonenta-z-32\.png"/);
  assert.match(html,/href="\/favicon\.ico"/);
- assert.match(sw,/zonenta-pwa-v34-z-icon/);
+ assert.match(sw,/zonenta-pwa-v35-original-splash/);
 });
