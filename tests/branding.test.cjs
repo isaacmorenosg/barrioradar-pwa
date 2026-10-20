@@ -12,7 +12,7 @@ test('Zonenta identity replaces public branding',()=>{
  assert.match(html,/class="topbar-mobile-tagline">Conoce el lugar antes de elegirlo\./);
  assert.match(css,/\.topbar-crumb #crumbCity,\.topbar-crumb \.crumb-chevron\{display:none!important\}/);
  assert.match(read('icons/zonenta-wordmark.svg'),/<path fill="#0F2D5B"/);
- assert.match(read('icons/zonenta-wordmark.svg'),/<circle cx="317\\.32" cy="61" r="8"/);
+ assert.ok(read('icons/zonenta-wordmark.svg').includes('<circle cx="317.32" cy="61" r="8"'), 'El punto naranja debe quedar junto a la palabra');
  assert.match(html,/class="mobile-rate-cta" id="mobileRateCTA" disabled/);
  assert.match(html,/class="mobile-sheet-chip" id="mobileSheetChip"[^>]*disabled/);
  assert.equal(manifest.short_name,'Zonenta');
