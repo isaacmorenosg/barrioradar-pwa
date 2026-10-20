@@ -29,5 +29,5 @@ test('no numeric opinion badges return on the map',()=>{
   assert.doesNotMatch(app,/class="polygon-count"|polygon-count-bg/);
 });
 test('installed PWA refreshes assets to the brighter sector style',()=>{
-  assert.match(sw,/zonenta-pwa-v28-ratings-refresh/);
+  assert.match(sw,/zonenta-pwa-v29-comparison-palette/);
 });

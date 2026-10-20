@@ -34,5 +34,5 @@ test('selected sector retains localized opinion count while map remains unclutte
 });
 test('color legend explains composite average and the offline shell changes',()=>{
  assert.match(app,/25 % cada indicador/);
- assert.match(sw,/zonenta-pwa-v28-ratings-refresh/);
+ assert.match(sw,/zonenta-pwa-v29-comparison-palette/);
 });

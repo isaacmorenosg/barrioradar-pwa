@@ -44,7 +44,7 @@ test('Returning from comparison schedules data loading after the view is visible
   const ctx={
     state:{view:'comparar'},
     EL:()=>({classList:{toggle(){},contains(){return false;}},setAttribute(){}}),
-    document:{querySelectorAll:()=>[]},window:{scrollTo(){}},
+    document:{querySelectorAll:()=>[],body:{classList:{toggle(){}}}},window:{scrollTo(){}},
     scheduleMapRefresh(){refreshes++;},cancelRatingsRequest(){},
     ratingsStatus(){},renderSavedPage(){},renderComparePage(){}
   };
@@ -107,6 +107,6 @@ test('Queries are cancellable and time-limited; old PWA cache is invalidated',()
   assert.match(api,/async function getRatings\(bounds, externalSignal\)/);
   assert.match(api,/abortSignal\(controller\.signal\)/);
   assert.match(api,/setTimeout\(\(\)=>controller\.abort\(\),14000\)/);
-  assert.match(sw,/zonenta-pwa-v28-ratings-refresh/);
+  assert.match(sw,/zonenta-pwa-v29-comparison-palette/);
   assert.match(html,/id="retryRatings"/);
 });

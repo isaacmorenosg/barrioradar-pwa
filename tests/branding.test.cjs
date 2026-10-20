@@ -22,5 +22,5 @@ test('brand colors do not overwrite sector assessment fills',()=>{
  assert.match(css,/--zonenta-navy:#0F2D5B/);
  assert.match(css,/--zonenta-orange:#FF6B3D/);
  assert.doesNotMatch(css,/\.map-overlay polygon\s*\{[^}]*fill:/);
- assert.match(sw,/zonenta-pwa-v28-ratings-refresh/);
+ assert.match(sw,/zonenta-pwa-v29-comparison-palette/);
 });
