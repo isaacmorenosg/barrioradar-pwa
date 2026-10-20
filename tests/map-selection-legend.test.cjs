@@ -24,11 +24,12 @@ test('count and sector preview are updated from current approved votes',()=>{
   assert.match(app,/info\.hidden=!chosen/);
   assert.match(app,/function renderDetails\(\)\{\s*updateMobileSelection\(\)/);
 });
-test('all sectors with votes display a count at initial mobile map zoom',()=>{
-  assert.match(app,/if\(state\.zoom>=14 \|\| \(isSelected&&state\.userSelected\)\)/);
-  assert.match(app,/class="polygon-count-bg/);
-  assert.match(css,/\.map-overlay \.polygon-count-bg\{/);
+test('map shows only colored sectors, without numeric review badges',()=>{
+  assert.doesNotMatch(app,/polygon-count-bg/);
+  assert.doesNotMatch(app,/if\(state\.zoom>=14 \|\| \(isSelected/);
+  assert.match(app,/const tone=scoreColor\(currentScore\(c\)\)/);
+  assert.match(app,/values.reduce\(\(sum,value\)=>sum\+value,0\)\/4/);
 });
 test('service worker updates mobile interface assets',()=>{
-  assert.match(sw,/barrioradar-pulse-mapas-v20-map-selection-legend/);
+  assert.match(sw,/barrioradar-pulse-mapas-v21-four-metrics/);
 });

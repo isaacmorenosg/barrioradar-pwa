@@ -303,3 +303,5 @@ button{touch-action:manipulation}
   .map-legend span{font-size:9px}
   .map-baseline .map-attribution{font-size:7px}
 }
+/* v21: no numeric badges; show review counts only after selecting the sector. */
+.map-overlay .polygon-count,.map-overlay .polygon-count-bg,.mobile-sheet-count{display:none!important}

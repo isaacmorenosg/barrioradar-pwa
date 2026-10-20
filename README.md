@@ -91,3 +91,11 @@ Validación visual y táctil: Chromium móvil simulado en 320×568, 360×760 y 3
 La leyenda de colores permanece siempre visible **encima de** los créditos de OpenStreetMap y CartoCiudad. El botón «Colores» ya no existe. Los sectores con valoraciones muestran el número de opiniones desde el zoom inicial 14.
 
 En móvil, tocar una zona **solo la resalta** y revela su identificador y el total de opiniones aprobadas en un resumen visible sobre el mapa. La ficha de puntuaciones se abre únicamente al pulsar «Ver zona», que además lleva una insignia con ese total. Los botones de ver y compartir se mantienen deshabilitados hasta elegir expresamente un sector; al buscar otra localidad, se limpia la selección anterior. Los gestos de pinza siguen funcionando. La caché PWA se incrementa a v20.
+
+## Mapa simplificado (v21)
+
+El mapa muestra solamente los colores de los sectores, sin cifras encima de los hexágonos. Al seleccionar un sector, el pequeño resumen muestra su identificador y el total de opiniones aprobadas (formato español: 5.000, 100.000); el usuario decide cuándo abrir la ficha mediante «Ver zona».
+
+El selector Día/Noche se elimina. Los colores se determinan mediante una **media aritmética con cuatro pesos iguales (25 % cada uno)**: seguridad percibida de día, de noche, iluminación y confort acústico. La ficha presenta los cuatro indicadores al mismo nivel y deja de destacar un único valor en un círculo. El color es una percepción subjetiva agregada y no una estadística oficial de delincuencia.
+
+La consulta pública, la moderación, las valoraciones y comentarios existentes en Supabase, los controles táctiles y la leyenda visible junto a los créditos del mapa se conservan. El service worker v21 invalida la interfaz anterior.
