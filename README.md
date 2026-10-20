@@ -115,3 +115,11 @@ La simplificación v21 ya muestra la media de cuatro percepciones para el color,
 ## Mayor visibilidad de los sectores en el mapa (v24)
 
 Los polígonos mantienen sus tres tonos (verde, ámbar y coral) y siguen siendo translúcidos para permitir leer calles y edificios. Se incrementa moderadamente la opacidad de relleno: **60 %** cuando hay menos de cinco opiniones aprobadas (antes 38 %), **76 %** cuando hay cinco o más (antes 58 %) y **88 %** en la zona seleccionada (antes 79 %). Los contornos son un poco más visibles; los sectores con menos de cinco opiniones conservan la línea discontinua para señalar que la muestra es escasa. No cambian la geometría, las calificaciones, el número de opiniones ni la moderación. Caché PWA v24.
+
+## Logotipo único y splash ilustrado (v31)
+
+El logo de cabecera y escritorio se muestra como una **única imagen PNG**, `public/icons/zonenta-lockup.png`, que integra letras, marcador naranja, punto final claramente separado y el lema. No hay texto o puntos posicionados individualmente.
+
+`public/assets/zonenta-opening.webp` reproduce el mapa pastel aprobado para la pantalla de inicio interna. Se desvanece al terminar de configurar la vista y, si falla algún script, tiene salida de seguridad. Las valoraciones se cargan de forma independiente.
+
+**Limitación de las PWA de Android:** el splash nativo inicial que crea Chrome no permite cambiar el icono centrado por una composición con mapa mediante el Web App Manifest. Se ha acortado el título nativo a «Zonenta» y, justo después, se muestra el splash ilustrado personalizado; la instalación conserva el mismo ID, datos y nombre corto.

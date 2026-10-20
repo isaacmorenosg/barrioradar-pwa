@@ -265,3 +265,7 @@ html,body,.app-shell,.main-content{background:#F8F9FB!important;color:var(--ink)
   .saved-card-actions button{font-size:12px}
   #viewComparar .comparison-layout{margin-bottom:26px}
 }
+
+.zonenta-brand img{display:block;width:188px;max-width:100%;height:auto}
+@media(max-width:760px){.topbar-mobile-brand .topbar-mobile-logo{width:150px;max-width:100%;height:auto}}
+@media(max-width:360px){.topbar-mobile-brand .topbar-mobile-logo{width:136px;height:auto}}
