@@ -22,7 +22,7 @@ test('brand colors do not overwrite sector assessment fills',()=>{
  assert.match(css,/--zonenta-navy:#0F2D5B/);
  assert.match(css,/--zonenta-orange:#FF6B3D/);
  assert.doesNotMatch(css,/\.map-overlay polygon\s*\{[^}]*fill:/);
- assert.match(sw,/zonenta-pwa-v31-brand-splash/);
+ assert.match(sw,/zonenta-pwa-v34-z-icon/);
 });
 
 test('Android installation uses updated PNG brand icons and maskable artwork',()=>{
@@ -33,7 +33,7 @@ test('Android installation uses updated PNG brand icons and maskable artwork',()
   assert.equal(bytes.subarray(0,4).toString('hex'),'89504e47');
  }
  assert.match(html,/rel="apple-touch-icon"[^>]+zonenta-z-180\.png/);
- assert.match(sw,/zonenta-pwa-v31-brand-splash/);
+ assert.match(sw,/zonenta-pwa-v34-z-icon/);
 });
 
 test('splash and header use a complete logo image',()=>{assert.match(html,/id="zonentaSplash"/);assert.match(html,/class="zonenta-splash-art" src="data:image\/svg\+xml,/);assert.match(html,/class="zonenta-splash-center" src="data:image\/svg\+xml,/);assert.match(read('splash.js'),/zonenta:app-ready/);assert.equal(manifest.name,'Zonenta');});

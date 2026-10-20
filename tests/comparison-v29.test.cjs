@@ -52,5 +52,5 @@ test('compare, saved, and help views use Zonenta palette with no floating map CT
  assert.match(css,/\.saved-card-actions button:first-child/);
  assert.match(html,/<body class="map-view-active">/);
  assert.match(app,/document\.body\.classList\.toggle\('map-view-active',view==='explorar'\)/);
- assert.match(sw,/zonenta-pwa-v31-brand-splash/);
+ assert.match(sw,/zonenta-pwa-v34-z-icon/);
 });
