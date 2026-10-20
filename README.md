@@ -103,3 +103,7 @@ La consulta pública, la moderación, las valoraciones y comentarios existentes 
 ## Legibilidad del mapa e icono de cuenta (v22)
 
 La simplificación v21 ya muestra la media de cuatro percepciones para el color, los recuentos de opiniones únicamente en el resumen del sector y la apertura explícita mediante «Ver zona». En v22 se añade el símbolo `user` al sprite SVG (soluciona el icono ausente de «Cuenta») y se aligera el filtro de las teselas de OpenStreetMap: brillo 0,88 en escritorio y 0,86 en móvil (antes 0,55 y 0,48 respectivamente). Se conserva el tema oscuro en controles y fichas. Se invalida la caché mediante el service worker v22 y se añaden pruebas de regresión.
+
+## Mayor visibilidad de los sectores en el mapa (v24)
+
+Los polígonos mantienen sus tres tonos (verde, ámbar y coral) y siguen siendo translúcidos para permitir leer calles y edificios. Se incrementa moderadamente la opacidad de relleno: **60 %** cuando hay menos de cinco opiniones aprobadas (antes 38 %), **76 %** cuando hay cinco o más (antes 58 %) y **88 %** en la zona seleccionada (antes 79 %). Los contornos son un poco más visibles; los sectores con menos de cinco opiniones conservan la línea discontinua para señalar que la muestra es escasa. No cambian la geometría, las calificaciones, el número de opiniones ni la moderación. Caché PWA v24.

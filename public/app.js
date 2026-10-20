@@ -156,7 +156,9 @@ function overlayRender(){
     if(cp.x< -85||cp.x>map.w+85||cp.y< -85||cp.y>map.h+85)continue;
     const tone=scoreColor(currentScore(c));
     const isSelected=c.id===state.selected?.id;
-    out+=`<polygon data-cell="${c.id}" points="${hexPoints(c)}" fill="${tone.fill}" fill-opacity="${isSelected?.79:(!PREVIEW_MODE&&c.count<5?.38:.58)}" stroke="${isSelected?'#20533e':tone.stroke}" stroke-width="${isSelected?2.5:1.4}" stroke-opacity=".9" stroke-dasharray="${!PREVIEW_MODE&&c.count<5?'5 4':'none'}"/>`;
+    // Fill is transparent enough to preserve street detail, but visible on dark tiles.
+    // Sectors with fewer than 5 approved reviews remain dashed and slightly paler.
+    out+=`<polygon data-cell="${c.id}" points="${hexPoints(c)}" fill="${tone.fill}" fill-opacity="${isSelected?.88:(!PREVIEW_MODE&&c.count<5?.60:.76)}" stroke="${isSelected?'#20533e':tone.stroke}" stroke-width="${isSelected?2.9:1.8}" stroke-opacity=".95" stroke-dasharray="${!PREVIEW_MODE&&c.count<5?'5 4':'none'}"/>`;
 
   }
   if(state.selected&&(state.userSelected||window.innerWidth>760)){out+=`<polygon class="selected-ring" points="${hexPoints(state.selected)}"/>`;}
