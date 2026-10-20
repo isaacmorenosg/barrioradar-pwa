@@ -24,6 +24,6 @@ test('rating numbers remain visible against their badges',()=>{
  assert.match(css,/\.modal-body \.slider-value\s*\{[^}]*background:#e0f3e9/);
 });
 test('updated service worker precaches and invalidates light theme',()=>{
- assert.match(sw,/zonenta-pwa-v29-comparison-palette/);
+ assert.match(sw,/zonenta-pwa-v30-install-icons/);
  assert.match(sw,/'\/radar-light.css'/);
 });

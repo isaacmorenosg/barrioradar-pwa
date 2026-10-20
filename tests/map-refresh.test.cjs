@@ -107,6 +107,6 @@ test('Queries are cancellable and time-limited; old PWA cache is invalidated',()
   assert.match(api,/async function getRatings\(bounds, externalSignal\)/);
   assert.match(api,/abortSignal\(controller\.signal\)/);
   assert.match(api,/setTimeout\(\(\)=>controller\.abort\(\),14000\)/);
-  assert.match(sw,/zonenta-pwa-v29-comparison-palette/);
+  assert.match(sw,/zonenta-pwa-v30-install-icons/);
   assert.match(html,/id="retryRatings"/);
 });
