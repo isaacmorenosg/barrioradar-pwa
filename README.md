@@ -1,4 +1,8 @@
-# BarrioRadar — PWA de opiniones vecinales moderadas
+# Zonenta — Conoce el lugar antes de elegirlo.
+
+La identidad pública de BarrioRadar cambia a **Zonenta**, con azul marino `#0F2D5B`, naranja `#FF6B3D` y fondo `#F8F9FB`. El nombre técnico del repositorio, los identificadores `br_*` y el dominio de Render permanecen sin cambios para conservar datos y compatibilidad. Los colores del mapa (verde/ámbar/rojo) son indicadores de valoración y no cambian con la marca.
+
+**Despliegue importante:** Render sigue compilando mediante `.github/workflows/barrioradar-pwa.zip`. Para activar la nueva interfaz es necesario publicar directamente `public/` o regenerar ese ZIP en el mismo formato antes de desplegar.
 
 BarrioRadar muestra **percepciones subjetivas de personas con correo verificado**, no estadísticas oficiales de delitos ni indicadores objetivos de seguridad. El mapa se abre en **Huelva**. Las opiniones reales solo aparecen cuando están **aprobadas**. Una única opinión aprobada puede visualizarse con aviso explícito de muestra muy limitada.
 

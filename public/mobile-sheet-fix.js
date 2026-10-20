@@ -1,4 +1,4 @@
-/* BarrioRadar v19: detach mobile sheet from the map layer; scroll the sheet itself. */
+/* Zonenta v19: detach mobile sheet from the map layer; scroll the sheet itself. */
 (() => {
   'use strict';
   document.addEventListener('DOMContentLoaded', () => {

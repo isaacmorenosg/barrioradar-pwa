@@ -3,22 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f5f7f4">
-  <meta name="description" content="Explora percepciones vecinales sobre tranquilidad, iluminacion y ambiente de zonas de Espana con datos transparentes y aportaciones moderadas.">
+  <meta name="theme-color" content="#F8F9FB">
+  <meta name="description" content="Zonenta. Conoce el lugar antes de elegirlo. Explora opiniones vecinales moderadas sobre tranquilidad, iluminación y ambiente en zonas de España.">
   <meta name="color-scheme" content="light">
   <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="/icons/zonenta-icon.svg">
   <link rel="icon" type="image/png" href="/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/radar-dark.css">
   <link rel="stylesheet" href="/mobile-sheet-fix.css">
   <link rel="stylesheet" href="/radar-light.css">
-  <title>BarrioRadar · Conoce el barrio antes de mudarte</title>
+  <link rel="stylesheet" href="/zonenta-theme.css">
+  <title>Zonenta · Conoce el lugar antes de elegirlo.</title>
 </head>
 <body>
 <div class="app-shell" id="appShell">
   <aside class="sidebar" aria-label="Navegacion principal">
-    <div class="brand"><div class="brand-mark"><span class="brand-arc"></span><span class="brand-point"></span></div><div class="brand-word">barrio<span>radar</span><small>Tu próxima zona, con contexto</small></div></div>
+    <div class="brand"><a class="zonenta-brand" href="/" aria-label="Zonenta, inicio"><img src="/icons/zonenta-wordmark.svg" width="192" height="49" alt="Zonenta."><span class="zonenta-brand-tagline">Conoce el lugar antes de elegirlo.</span></a></div>
     <div class="sidebar-section-caption">TU ESPACIO</div>
     <nav class="sidebar-nav" aria-label="Secciones">
       <button class="nav-link active" data-view="explorar"><svg class="icon"><use href="/icons.svg#compass"/></svg><span>Explorar mapa</span><span class="nav-dot"></span></button>
@@ -37,12 +39,12 @@
   </aside>
   <main class="main-content">
     <header class="topbar">
-      <div class="topbar-crumb"><button class="mobile-menu icon-button" id="mobileMenu" aria-label="Abrir menu"><svg class="icon"><use href="/icons.svg#menu"/></svg></button><span>Explorar España</span><svg class="icon crumb-chevron"><use href="/icons.svg#chevron-right"/></svg><strong id="crumbCity">Huelva</strong></div>
+      <div class="topbar-crumb"><img class="topbar-mobile-logo" src="/icons/zonenta-wordmark.svg" alt="Zonenta"><button class="mobile-menu icon-button" id="mobileMenu" aria-label="Abrir menu"><svg class="icon"><use href="/icons.svg#menu"/></svg></button><span>Explorar España</span><svg class="icon crumb-chevron"><use href="/icons.svg#chevron-right"/></svg><strong id="crumbCity">Huelva</strong></div>
       <div class="header-right"><span class="topbar-flag">ES <span>•</span> ESPAÑA</span><button type="button" class="header-account" id="accountButton" aria-label="Iniciar sesion o ver mi cuenta">Mi cuenta</button></div>
     </header>
     <div class="content-pad">
       <div id="viewExplorar" class="page-view">
-        <section class="welcome"><div class="welcome-copy"><div class="eyebrow"><span class="eyebrow-line"></span> MUDARSE CON MÁS CONTEXTO</div><h1>Descubre cómo se <em>vive</em><br>antes de mudarte.</h1><p>La perspectiva de quienes conocen cada zona. Explora tranquilidad, iluminación y ambiente, de día y de noche.</p></div><div class="welcome-decoration" aria-hidden="true"><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><span class="ring-center"></span><span class="ring-ping p1"></span><span class="ring-ping p2"></span></div></section>
+        <section class="welcome"><div class="welcome-copy"><div class="eyebrow"><span class="eyebrow-line"></span> TU PRÓXIMA ZONA, CON CONTEXTO</div><h1>Conoce el lugar<br><em>antes de elegirlo.</em></h1><p>La perspectiva de quienes conocen cada zona. Explora tranquilidad, iluminación y ambiente, de día y de noche.</p></div><div class="welcome-decoration" aria-hidden="true"><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><span class="ring-center"></span><span class="ring-ping p1"></span><span class="ring-ping p2"></span></div></section>
         <section class="search-section" aria-label="Buscar zona"><form id="placeForm" class="search-field"><svg class="icon"><use href="/icons.svg#search"/></svg><input type="search" id="placeSearch" placeholder="Busca cualquier ciudad o pueblo de España" autocomplete="off" aria-label="Buscar ciudad" required><button type="submit" id="searchButton">Explorar <svg class="icon"><use href="/icons.svg#arrow-right"/></svg></button></form><div class="quick-locations"><span>Prueba en</span><button type="button" data-city="Madrid">Madrid</button><button type="button" data-city="Sevilla">Sevilla</button><button type="button" data-city="Valencia">Valencia</button><button type="button" data-city="Málaga">Málaga</button><button type="button" data-city="Huelva">Huelva</button></div></section>
         <div id="sampleBanner" hidden role="note" class="sample-banner">VISTA DE PRUEBA: datos y opiniones inventados en Huelva. <a href="/">Ver datos reales ↗</a></div>
         <div class="demo-notice" id="communityNotice"><div class="demo-notice-icon"><svg class="icon"><use href="/icons.svg#info"/></svg></div><div><strong>Datos reales de cuentas con correo verificado</strong><span>El mapa empieza sin puntuaciones. Mostramos promedios desde la primera valoración aprobada. Con 1 a 4 opiniones la muestra es muy limitada y no representa al barrio. La percepción vecinal no equivale a estadísticas de delitos.</span></div></div>
@@ -68,7 +70,7 @@
       <section id="viewGuardadas" class="page-view hidden" aria-label="Zonas guardadas"><div class="simple-header"><span class="section-kicker">TU SELECCIÓN</span><h1>Zonas <em>guardadas.</em></h1><p>Conserva hasta tres zonas para volver a consultarlas. Solo se guardan en este dispositivo.</p></div><div class="saved-grid" id="savedList"></div></section>
       <section id="viewComparar" class="page-view hidden" aria-label="Comparar zonas"><div class="simple-header"><span class="section-kicker">COMPARA CON CRITERIO</span><h1>Dos lugares, <em>más contexto.</em></h1><p>Elige dos zonas desde el mapa y revisa sus valoraciones, de día y de noche, en paralelo.</p></div><div id="compareList"></div></section>
       <section id="viewMetodologia" class="page-view hidden" aria-label="Metodologia"><div class="simple-header"><span class="section-kicker">CÓMO GENERAMOS CONFIANZA</span><h1>La transparencia <em>es el mapa.</em></h1><p>Una herramienta de percepciones ciudadanas, no una clasificación oficial de seguridad ni una predicción de delitos.</p></div><div class="method-grid"><article class="method-card"><span class="step-number">01 / CONTRIBUCIONES</span><h3>Personas, no rumores</h3><p>Preguntamos por experiencias cotidianas estructuradas: sensación al caminar, iluminación, ruido y entorno. No admitimos señalar a personas ni atribuir delitos.</p></article><article class="method-card"><span class="step-number">02 / UMBRAL MÍNIMO</span><h3>Visible desde 1 opinión</h3><p>Se visualiza una zona desde la primera aportación aprobada de una cuenta con correo verificado durante los últimos 180 días. Con 1-4 opiniones la muestra es muy limitada y se identifica mediante contornos discontinuos; la puntuación no describe la seguridad real del barrio.</p></article><article class="method-card"><span class="step-number">03 / MODERACIÓN</span><h3>Con límites claros</h3><p>Las opiniones pasan por una cola de moderación. El sistema limita la frecuencia y evita multiples votos de una misma cuenta por zona. En una produccion abierta habria que anadir verificacion antifraude adicional; varias cuentas podrian pertenecer a la misma persona; este riesgo se revisara antes de abrir al publico.</p></article><article class="method-card"><span class="step-number">04 / DATOS OFICIALES</span><h3>Otra capa, otro significado</h3><p>Las estadísticas del Ministerio del Interior se publican para distintos ámbitos, incluidos municipios de más de 20.000 habitantes. No deben atribuirse directamente a una calle o cuadrícula de este mapa.</p><a href="https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/balances.html" target="_blank" rel="noreferrer">Ver fuente oficial ↗</a></article></div><div class="method-banner"><svg class="icon"><use href="/icons.svg#info"/></svg><p><strong>Importante:</strong> una zona sin valoraciones aparece como <strong>sin datos</strong>, nunca como segura o insegura. Las opiniones reflejan percepciones, no hechos policiales verificados. No uses la app como única base para decidir dónde vivir.</p></div></section>
-      <footer class="footer"><span>© 2026 BarrioRadar · Hecho para explorar sin prejuicios.</span><div><button id="footerMethod">Metodología</button><span>•</span><a href="/privacidad.html">Privacidad</a><span>•</span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">Mapas © OSM</a></div></footer>
+      <footer class="footer"><span>© 2026 Zonenta · Hecho para explorar sin prejuicios.</span><div><button id="footerMethod">Metodología</button><span>•</span><a href="/privacidad.html">Privacidad</a><span>•</span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">Mapas © OSM</a></div></footer>
     </div>
   </main>
 </div>

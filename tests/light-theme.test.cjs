@@ -7,9 +7,10 @@ const read=name=>fs.readFileSync(path.join(root,name),'utf8');
 const html=read('index.html'),css=read('radar-light.css'),sw=read('sw.js'),app=read('app.js'),manifest=JSON.parse(read('manifest.webmanifest'));
 test('light theme loads after original dark layer and mobile patch',()=>{
  const dark=html.indexOf('href="/radar-dark.css"'),fix=html.indexOf('href="/mobile-sheet-fix.css"'),light=html.indexOf('href="/radar-light.css"');
- assert.ok(dark>=0&&fix>dark&&light>fix);
+ const brand=html.indexOf('href="/zonenta-theme.css"');
+ assert.ok(dark>=0&&fix>dark&&light>fix&&brand>light);
  assert.match(html,/<meta name="color-scheme" content="light">/);
- assert.equal(manifest.theme_color,'#f5f7f4');
+ assert.equal(manifest.theme_color,'#F8F9FB');
 });
 test('light theme covers core views, controls and mobile sheets',()=>{
  for(const cls of ['.sidebar','.search-field','.map-card','.details-card','.mobile-nav','.modal-card','.modal-body .slider-value','.map-tiles img','.mobile-sector-preview']) assert.ok(css.includes(cls),cls);
@@ -23,6 +24,6 @@ test('rating numbers remain visible against their badges',()=>{
  assert.match(css,/\.modal-body \.slider-value\s*\{[^}]*background:#e0f3e9/);
 });
 test('updated service worker precaches and invalidates light theme',()=>{
- assert.match(sw,/barrioradar-pulse-mapas-v25-light-theme/);
+ assert.match(sw,/zonenta-pwa-v26-branding/);
  assert.match(sw,/'\/radar-light.css'/);
 });

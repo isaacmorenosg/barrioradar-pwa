@@ -1,4 +1,4 @@
-/* BarrioRadar · mobile map-first interaction shell. Existing app handles reviews, auth and map data. */
+/* Zonenta · mobile map-first interaction shell. Existing app handles reviews, auth and map data. */
 (() => {
   'use strict';
   document.addEventListener('DOMContentLoaded', () => {

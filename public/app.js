@@ -1,4 +1,4 @@
-/* BarrioRadar: datos reales; muestra visual segregada mediante ?muestras=1 */
+/* Zonenta: datos reales; muestra visual segregada mediante ?muestras=1 */
 (() => {
 'use strict';
 const R=6378137, TAU=Math.PI*2, WORLD=TAU*R, HEX=200, SQRT3=Math.sqrt(3);
@@ -501,12 +501,12 @@ async function openAccount({fromRating=false}={}){
     });
     return;
   }
-  openModal(`<div class="modal-heading"><div><div class="modal-kicker">ACCESO GRATUITO</div><h2>${fromRating?'Primero verifica tu correo':'Entra en BarrioRadar'}</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div>
+  openModal(`<div class="modal-heading"><div><div class="modal-kicker">ACCESO GRATUITO</div><h2>${fromRating?'Primero verifica tu correo':'Entra en Zonenta'}</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div>
     <p class="modal-description">${fromRating?'Para poder puntuar un sector necesitamos comprobar que tienes acceso a un correo electrónico. Todavía no puedes rellenar la valoración.':'Verifica tu correo para poder compartir experiencias. Consultar el mapa no requiere iniciar sesión.'}</p>
     <ol class="auth-steps" aria-label="Cómo acceder">
       <li><span>1</span><p><strong>Introduce tu correo.</strong> Te enviaremos un enlace de acceso.</p></li>
-      <li><span>2</span><p><strong>Abre tu correo</strong> y pulsa «Entrar» en el mensaje de BarrioRadar.</p></li>
-      <li><span>3</span><p><strong>Vuelve a BarrioRadar.</strong> Al estar verificado, ya podrás valorar la zona.</p></li>
+      <li><span>2</span><p><strong>Abre tu correo</strong> y pulsa «Entrar» en el mensaje de Zonenta.</p></li>
+      <li><span>3</span><p><strong>Vuelve a Zonenta.</strong> Al estar verificado, ya podrás valorar la zona.</p></li>
     </ol>
     <form id="emailLoginForm" class="auth-email-form">
       <label for="loginEmail">Tu correo electrónico</label>
@@ -516,7 +516,7 @@ async function openAccount({fromRating=false}={}){
     <div id="authSentState" class="auth-sent" hidden>
       <strong>¡Revisa tu correo!</strong>
       <p>Hemos solicitado un enlace para <strong id="authSentEmail"></strong>.</p>
-      <p>Busca el mensaje de BarrioRadar (también en Spam) y pulsa su enlace. No tienes que copiar códigos ni contraseñas.</p>
+      <p>Busca el mensaje de Zonenta (también en Spam) y pulsa su enlace. No tienes que copiar códigos ni contraseñas.</p>
       <button class="secondary-button" id="changeLoginEmail" type="button">Usar otro correo</button>
     </div>
     <p id="loginStatus" class="auth-status" role="status" aria-live="polite"></p>
@@ -531,7 +531,7 @@ async function openAccount({fromRating=false}={}){
       EL('emailLoginForm').hidden=true;
       EL('authSentEmail').textContent=email;
       EL('authSentState').hidden=false;
-      status.textContent='En cuanto pulses el enlace recibido, podrás volver a BarrioRadar y opinar.';
+      status.textContent='En cuanto pulses el enlace recibido, podrás volver a Zonenta y opinar.';
     }catch(error){
       status.textContent=error.message||'No se pudo enviar el enlace. Inténtalo de nuevo.';
     }finally{send.disabled=false;send.innerHTML=`Enviarme el enlace por correo ${icon('arrow-right')}`;}
@@ -628,7 +628,7 @@ async function openRating(){
 }
 function openPlan(){openModal(`<div class="modal-heading"><div><div class="modal-kicker">BARRIORADAR PLUS · EN DESARROLLO</div><h2>Una decisión importante merece contexto.</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><p class="modal-description">La versión inicial siempre permitirá explorar y contribuir gratuitamente. Estamos preparando herramientas para comparar direcciones y entender mejor cada zona.</p><div class="modal-list"><div>${icon('check')} Informes comparativos de varios entornos.</div><div>${icon('check')} Evolución de opiniones a lo largo del tiempo.</div><div>${icon('check')} Alertas sobre cambios, con controles de calidad.</div></div><p class="modal-caption">No existe todavía pago ni suscripción activa. Estas funciones son una propuesta de producto.</p><button class="primary-button" data-close style="width:100%;margin-top:16px">Entendido</button>`);EL('modalContent').querySelectorAll('[data-close]').forEach(btn=>btn.addEventListener('click',closeModal));}
 function openLegend(){openModal(`<div class="modal-heading"><div><div class="modal-kicker">CÓMO LEER EL MAPA</div><h2>Los colores resumen cuatro percepciones.</h2><p class="modal-caption">El color de cada sector se calcula como la media aritmética de seguridad de día, seguridad de noche, iluminación y confort acústico (25 % cada indicador). Es un resumen de percepciones subjetivas y no una medida oficial de seguridad.</p></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><div class="modal-list"><div><i class="legend-dot green" style="margin-top:6px"></i> Verde: media desde 3,7 sobre 5.</div><div><i class="legend-dot orange" style="margin-top:6px"></i> Ámbar: media de 2,8 a menos de 3,7.</div><div><i class="legend-dot red" style="margin-top:6px"></i> Coral: media por debajo de 2,8. No significa que haya delitos confirmados.</div><div>${icon('info')} Sin color significa falta de datos, nunca ausencia de riesgo.</div></div><p class="modal-description">Una zona aparece desde su primera opinión moderada de una cuenta con correo verificado en los últimos 180 días. Con menos de cinco opiniones, los polígonos se dibujan con línea discontinua y la fiabilidad es muy limitada.</p><button class="primary-button" id="legendMethod" style="width:100%">Ver metodología ${icon('arrow-right')}</button>`);EL('legendMethod').addEventListener('click',()=>{closeModal();changeView('metodologia');});}
-function openInstallHelp(){openModal(`<div class="modal-heading"><div><div class="modal-kicker">UNA APP EN TU MÓVIL</div><h2>Instala BarrioRadar</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><p class="modal-description">Es una PWA: puedes añadirla a la pantalla de inicio sin pasar por una tienda de aplicaciones. El mapa y las aportaciones requieren conexión a Internet.</p><div class="modal-list"><div>${icon('download')} En Android/Chrome, abre el menú del navegador y elige «Instalar aplicación» o «Añadir a pantalla de inicio».</div><div>${icon('download')} En iPhone/Safari, usa «Compartir» y después «Añadir a pantalla de inicio».</div><div>${icon('shield')} Para instalarla desde un servidor remoto, necesitas HTTPS.</div></div><button class="primary-button" data-close style="width:100%">Entendido</button>`);EL('modalContent').querySelectorAll('[data-close]').forEach(btn=>btn.addEventListener('click',closeModal));}
+function openInstallHelp(){openModal(`<div class="modal-heading"><div><div class="modal-kicker">UNA APP EN TU MÓVIL</div><h2>Instala Zonenta</h2></div><button class="modal-x" data-close aria-label="Cerrar">${icon('x')}</button></div><p class="modal-description">Es una PWA: puedes añadirla a la pantalla de inicio sin pasar por una tienda de aplicaciones. El mapa y las aportaciones requieren conexión a Internet.</p><div class="modal-list"><div>${icon('download')} En Android/Chrome, abre el menú del navegador y elige «Instalar aplicación» o «Añadir a pantalla de inicio».</div><div>${icon('download')} En iPhone/Safari, usa «Compartir» y después «Añadir a pantalla de inicio».</div><div>${icon('shield')} Para instalarla desde un servidor remoto, necesitas HTTPS.</div></div><button class="primary-button" data-close style="width:100%">Entendido</button>`);EL('modalContent').querySelectorAll('[data-close]').forEach(btn=>btn.addEventListener('click',closeModal));}
 function bindUI(){
   document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>changeView(btn.dataset.view)));
   document.querySelectorAll('[data-city]').forEach(btn=>btn.addEventListener('click',()=>chooseLocation(PRESETS[clean(btn.dataset.city)])));
