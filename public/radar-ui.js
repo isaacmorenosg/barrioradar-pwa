@@ -37,22 +37,36 @@
     resetForSize();
     if (mobile.addEventListener) mobile.addEventListener('change', resetForSize);
     else if (mobile.addListener) mobile.addListener(resetForSize);
-    let touch = null;
-    map.addEventListener('pointerdown', event => {
-      if (!mobile.matches || (event.pointerType === 'mouse' && event.button !== 0)) return;
-      touch = {x:event.clientX,y:event.clientY};
-    }, {passive:true});
-    map.addEventListener('pointermove', event => {
-      if (touch && Math.hypot(event.clientX-touch.x,event.clientY-touch.y)>9) touch=null;
-    }, {passive:true});
-    map.addEventListener('pointerup', () => {
-      if (!touch) return;
+    let touch=null;
+    const activeTouches=new Set();
+    let multiTouch=false;
+    map.addEventListener('pointerdown',event=>{
+      if(!mobile.matches || (event.pointerType==='mouse'&&event.button!==0))return;
+      activeTouches.add(event.pointerId);
+      if(activeTouches.size>1){multiTouch=true;touch=null;return;}
+      if(!multiTouch)touch={id:event.pointerId,x:event.clientX,y:event.clientY};
+    },{passive:true});
+    map.addEventListener('pointermove',event=>{
+      if(multiTouch)return;
+      if(touch&&touch.id===event.pointerId&&Math.hypot(event.clientX-touch.x,event.clientY-touch.y)>9)touch=null;
+    },{passive:true});
+    map.addEventListener('pointerup',event=>{
+      activeTouches.delete(event.pointerId);
+      if(multiTouch){
+        touch=null;
+        if(activeTouches.size===0)multiTouch=false;
+        return; // A two-finger gesture must never open the details sheet.
+      }
+      if(!touch||touch.id!==event.pointerId)return;
       touch=null;
-      requestAnimationFrame(() => {
-        if (mobile.matches && !document.querySelector('#modalRoot:not(.hidden)')) setOpen(true,false);
+      requestAnimationFrame(()=>{
+        if(mobile.matches&&!document.querySelector('#modalRoot:not(.hidden)'))setOpen(true,false);
       });
-    }, {passive:true});
-    map.addEventListener('pointercancel',()=>{touch=null;},{passive:true});
+    },{passive:true});
+    map.addEventListener('pointercancel',event=>{
+      activeTouches.delete(event.pointerId);touch=null;
+      if(activeTouches.size===0)multiTouch=false;
+    },{passive:true});
     map.addEventListener('keydown',event=>{
       if (event.key==='Enter' && mobile.matches) requestAnimationFrame(()=>setOpen(true,false));
     });

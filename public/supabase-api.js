@@ -32,6 +32,19 @@
     throwIf(error);
     return data || { cells: [] };
   }
+  // Fetch every approved written comment, 20 at a time, only for the selected sector.
+  async function getSectorComments(cellId,offset=0,limit=20){
+    const {data,error}=await getClient().rpc('br_sector_comments',{
+      p_cell_id:String(cellId||''),
+      p_offset:Number(offset),
+      p_limit:Number(limit)
+    });
+    throwIf(error);
+    if(!data||!Array.isArray(data.comments)||!Number.isInteger(data.total))
+      throw new Error('No se pudo consultar los comentarios de esta zona.');
+    return {comments:data.comments.filter(c=>typeof c?.text==='string'),
+      total:data.total,hasMore:Boolean(data.has_more)};
+  }
   // Only verified Supabase Auth identities may contribute to public aggregates.
   // An anonymous device/session is deliberately not accepted as a unique person.
   async function getCommunityUser() {
@@ -277,7 +290,7 @@
   }
   async function logoutAdmin() { await logoutCommunity(); }
 
-  window.BarrioAPI = Object.freeze({ configured, getRatings, sendReview, hasMyReview, searchPlaces, resolvePlace,
+  window.BarrioAPI = Object.freeze({ configured, getRatings, getSectorComments, sendReview, hasMyReview, searchPlaces, resolvePlace,
     getCommunityUser, sendLoginEmail, confirmEmailCode, logoutCommunity, onCommunityAuthChange,
     currentAdmin, adminQueue, moderate, logoutAdmin });
 }());

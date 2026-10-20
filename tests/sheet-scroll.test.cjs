@@ -30,6 +30,6 @@ test('close controls remain accessible without hijacking inner scroll',()=>{
   assert.ok(!ui.includes("detailsContent').addEventListener('touchmove'"));
 });
 test('service worker refreshes cached CSS in installed PWA',()=>{
-  assert.ok(sw.includes('barrioradar-pulse-mapas-v17-sheet-scroll'));
+  assert.ok(sw.includes('barrioradar-pulse-mapas-v18-comments-pinch'));
   assert.ok(sw.includes("'/radar-dark.css'"));
 });

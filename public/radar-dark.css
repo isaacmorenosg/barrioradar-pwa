@@ -267,3 +267,6 @@ button{touch-action:manipulation}
     white-space:pre-wrap;
   }
 }
+
+/* Paginated sector comments: readable button, even inside the scrolling mobile sheet. */
+.community-comments #moreSectorComments{width:100%;margin-top:12px;min-height:44px;white-space:normal;}

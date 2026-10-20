@@ -101,6 +101,7 @@ migrateSavedSectors();
 
 const state={city:'Huelva',center:{lat:37.2614,lng:-6.9447},zoom:14,mode:'night',realCells:[],selected:null,saved:safeRead('br_saved_v2',[]).filter(i=>!i.demo).map(i=>({...i,snapshot:null})),comparison:safeRead('br_compare_v2',[]).filter(i=>!i.demo).map(i=>({...i,snapshot:null})),view:'explorar',deferredInstall:null};
 const map={viewport:null,tiles:null,overlay:null,w:0,h:0,drag:null,readSeq:0};
+const commentsView={cellId:null,items:[],total:0,loaded:false,loading:false,error:false,seq:0};
 let toastTimer=0;
 function toast(message){const el=EL('toast');el.textContent=message;el.classList.add('shown');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('shown'),3300);}
 function activeCells(){return state.realCells;}
@@ -164,21 +165,68 @@ function initMap(){
   map.viewport=EL('mapViewport');map.tiles=EL('mapTiles');map.overlay=EL('mapOverlay');
   const resize=()=>{const box=map.viewport.getBoundingClientRect();map.w=Math.round(box.width);map.h=Math.round(box.height);renderAllMap();};
   new ResizeObserver(resize).observe(map.viewport);resize();
+  // Track both fingers. A pinch is not a tap: never send it to sector selection.
+  const activePointers=new Map();
+  let pinch=null,pinchUsed=false;
+  const resetPan=()=>{
+    map.drag=null;
+    map.viewport.classList.remove('is-dragging');
+    map.tiles.style.transform='';
+    map.overlay.style.transform='';
+  };
+  const pinchData=()=>{
+    const [a,b]=[...activePointers.values()].slice(0,2);
+    const middle={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+    return {distance:Math.hypot(a.x-b.x,a.y-b.y),middle};
+  };
   map.viewport.addEventListener('pointerdown',e=>{
     if(e.button!==0&&e.pointerType==='mouse')return;
-    const point=positionFromPointer(e);map.drag={x:e.clientX,y:e.clientY,startPoint:point,center:toPx(state.center.lat,state.center.lng,state.zoom),moved:false};
+    activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
     map.viewport.setPointerCapture(e.pointerId);
+    if(activePointers.size>=2){
+      resetPan();
+      pinch=pinchData();
+      pinchUsed=true;
+      return;
+    }
+    if(pinchUsed)return;
+    const point=positionFromPointer(e);
+    map.drag={pointerId:e.pointerId,x:e.clientX,y:e.clientY,startPoint:point,center:toPx(state.center.lat,state.center.lng,state.zoom),moved:false};
   });
   map.viewport.addEventListener('pointermove',e=>{
-    if(!map.drag)return;
+    if(!activePointers.has(e.pointerId))return;
+    activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(activePointers.size>=2 && pinch){
+      const current=pinchData();
+      if(pinch.distance>=12&&current.distance>=12){
+        const ratio=current.distance/pinch.distance;
+        if(ratio>=1.22||ratio<=1/1.22){
+          const box=map.viewport.getBoundingClientRect();
+          // Zoom anchored halfway between fingers; the map's tile zoom stays integral.
+          changeZoom(ratio>1?1:-1,{x:current.middle.x-box.left,y:current.middle.y-box.top});
+          pinch=current;
+        }
+      }
+      return;
+    }
+    if(pinchUsed||!map.drag||map.drag.pointerId!==e.pointerId)return;
     const dx=e.clientX-map.drag.x,dy=e.clientY-map.drag.y;
     if(Math.hypot(dx,dy)>5)map.drag.moved=true;
     if(map.drag.moved){map.viewport.classList.add('is-dragging');map.tiles.style.transform=`translate(${dx}px, ${dy}px)`;map.overlay.style.transform=`translate(${dx}px, ${dy}px)`;}
   });
-  const endDrag=(e)=>{
-    if(!map.drag)return;
-    const drag=map.drag;map.drag=null;
-    map.viewport.classList.remove('is-dragging');map.tiles.style.transform='';map.overlay.style.transform='';
+  const endDrag=e=>{
+    const tracked=activePointers.has(e.pointerId);
+    if(tracked)activePointers.delete(e.pointerId);
+    if(pinchUsed){
+      resetPan();
+      pinch=null;
+      if(activePointers.size===0)pinchUsed=false;
+      return;
+    }
+    if(!tracked||!map.drag||map.drag.pointerId!==e.pointerId)return;
+    const drag=map.drag;
+    resetPan();
+    if(e.type==='pointercancel')return;
     if(drag.moved){
       const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
       const center=pxToLL(drag.center.x-dx,drag.center.y-dy,state.zoom);
@@ -190,7 +238,7 @@ function initMap(){
     }
   };
   map.viewport.addEventListener('pointerup',endDrag);
-  map.viewport.addEventListener('pointercancel',e=>{if(map.drag)endDrag(e);});
+  map.viewport.addEventListener('pointercancel',endDrag);
   map.viewport.addEventListener('wheel',e=>{e.preventDefault();changeZoom(e.deltaY<0?1:-1,positionFromPointer(e));},{passive:false});
   map.viewport.addEventListener('keydown',e=>{
     if(e.key==='+'||e.key==='='){e.preventDefault();changeZoom(1);return;}
@@ -241,13 +289,50 @@ function currentSnapshot(){
 function renderDetails(){
   const root=EL('detailsContent');
   const c=state.selected,record=selectedRecord();
+  if(commentsView.cellId!==(c?.id||null)){
+    commentsView.cellId=c?.id||null;
+    commentsView.items=[];commentsView.total=0;commentsView.loaded=false;
+    commentsView.loading=false;commentsView.error=false;commentsView.seq++;
+  }
   if(!c){root.innerHTML=`<div class="details-topline"><span class="detail-eyebrow">EXPLORA SIN PRISA</span>${icon('map-pin')}</div><div class="empty-details"><div class="empty-visual"></div><h3>Elige una zona<br>del mapa</h3><p>Pulsa cualquier punto del mapa para ver las opiniones existentes o añadir la tuya.</p><button class="primary-button" id="detailsStart">${icon('compass')} Explorar el mapa</button></div>`;EL('detailsStart').addEventListener('click',()=>map.viewport.focus());return;}
   if(!record){root.innerHTML=`<div class="details-topline"><span class="detail-eyebrow">${sectorName(c)}</span><span class="detail-eyebrow">SIN DATOS</span></div><div class="detail-head"><h3>Esta zona espera voces</h3><p>${escapeHtml(displayedCity())} · sector reducido · cuadrícula aproximada</p></div><div class="empty-details"><div class="empty-visual"></div><h3>Aún no hay opiniones aprobadas</h3><p>La primera valoración aprobada aparecerá aquí. Una opinión aislada no representa al barrio ni permite sacar conclusiones de seguridad.</p></div><div class="detail-actions"><button class="primary-button" id="detailRate">${icon('message')} Compartir mi experiencia</button><button class="secondary-button" id="detailSave">${icon('bookmark')} ${selectedIsSaved()?'Quitar de guardadas':'Guardar esta zona'}</button></div>`;bindDetails();return;}
   const score=currentScore(record),tone=scoreColor(score),confidence=record.count===1?'Solo 1 opinión: muestra muy limitada':record.count<5?'Muy pocas opiniones: muestra limitada':record.count>=25?'Más aportaciones':record.count>=10?'Muestra moderada':'Muestra pequeña';
   const ring=((score-1)/4*100).toFixed(1)+'%';
   const metric=(label,value)=>`<div class="meter-row"><div class="meter-label"><span>${label}</span><strong>${value.toFixed(1)} / 5</strong></div><div class="meter-track"><div class="meter-fill" style="width:${((value-1)/4*100).toFixed(1)}%"></div></div></div>`;
-  root.innerHTML=`<div class="details-topline"><span class="detail-eyebrow">${sectorName(c)}</span><span class="detail-eyebrow">${PREVIEW_MODE?'MUESTRA FICTICIA':'COMUNIDAD'}</span></div><div class="detail-head"><h3>${PREVIEW_MODE?'Ejemplo: '+escapeHtml(record.name):'Entorno seleccionado'}</h3><p>${escapeHtml(displayedCity())} · ${record.count} ${PREVIEW_MODE?'opiniones simuladas':record.count===1?'opinión moderada':'opiniones moderadas'}</p></div><div class="signal-block"><div class="score-ring" style="--score-percent:${ring};background:conic-gradient(${tone.fill} ${ring},#dfebe1 0)"><div><strong>${score.toFixed(1)}</strong><small>de 5</small></div></div><div class="signal-copy"><strong>${tone.label}</strong><p>Seguridad percibida ${state.mode==='day'?'de día':'de noche'}; no es la media de todos los indicadores.</p></div></div><div class="detail-section-title">Mirada a la zona</div><div class="meter-list">${metric('Seguridad percibida de día',record.day)}${metric('Seguridad percibida de noche',record.night)}${metric('Iluminación percibida',record.light)}${metric('Confort acústico',record.noise)}</div><div class="data-confidence">${icon('info')} <span>${PREVIEW_MODE?'Datos 100 % inventados para probar la interfaz, no describen esta zona.':confidence+' ('+record.count+'). Las notas son percepciones subjetivas: con pocas opiniones no son representativas ni datos oficiales de delitos.'}</span></div>${PREVIEW_MODE?`<div class="sample-quotes"><strong>Opiniones de ejemplo · inventadas</strong>${record.notes.map(n=>`<p>«${escapeHtml(n)}»</p>`).join('')}</div>`:record.comments?.length?`<div class="community-comments"><strong>Comentarios de vecinos · revisados</strong>${record.comments.map(n=>`<p>«${escapeHtml(n)}»</p>`).join('')}<small>Opiniones personales, no hechos comprobados. Hasta 5 comentarios recientes.</small></div>`:''}<div class="detail-actions"><button class="primary-button" id="detailRate">${icon('plus')} ${PREVIEW_MODE?'Ir al modo real para opinar':'Compartir mi experiencia'}</button><div class="detail-secondary-actions"><button class="secondary-button" id="detailSave">${icon('bookmark')} ${selectedIsSaved()?'Guardada':'Guardar'}</button><button class="secondary-button" id="detailCompare">${icon('compare')} ${selectedIsCompared()?'Quitar':'Comparar'}</button></div></div>`;
+  root.innerHTML=`<div class="details-topline"><span class="detail-eyebrow">${sectorName(c)}</span><span class="detail-eyebrow">${PREVIEW_MODE?'MUESTRA FICTICIA':'COMUNIDAD'}</span></div><div class="detail-head"><h3>${PREVIEW_MODE?'Ejemplo: '+escapeHtml(record.name):'Entorno seleccionado'}</h3><p>${escapeHtml(displayedCity())} · ${record.count} ${PREVIEW_MODE?'opiniones simuladas':record.count===1?'opinión moderada':'opiniones moderadas'}</p></div><div class="signal-block"><div class="score-ring" style="--score-percent:${ring};background:conic-gradient(${tone.fill} ${ring},#dfebe1 0)"><div><strong>${score.toFixed(1)}</strong><small>de 5</small></div></div><div class="signal-copy"><strong>${tone.label}</strong><p>Seguridad percibida ${state.mode==='day'?'de día':'de noche'}; no es la media de todos los indicadores.</p></div></div><div class="detail-section-title">Mirada a la zona</div><div class="meter-list">${metric('Seguridad percibida de día',record.day)}${metric('Seguridad percibida de noche',record.night)}${metric('Iluminación percibida',record.light)}${metric('Confort acústico',record.noise)}</div><div class="data-confidence">${icon('info')} <span>${PREVIEW_MODE?'Datos 100 % inventados para probar la interfaz, no describen esta zona.':confidence+' ('+record.count+'). Las notas son percepciones subjetivas: con pocas opiniones no son representativas ni datos oficiales de delitos.'}</span></div>${PREVIEW_MODE?`<div class="sample-quotes"><strong>Opiniones de ejemplo · inventadas</strong>${record.notes.map(n=>`<p>«${escapeHtml(n)}»</p>`).join('')}</div>`:'<div id="communityCommentsContainer"></div>'}<div class="detail-actions"><button class="primary-button" id="detailRate">${icon('plus')} ${PREVIEW_MODE?'Ir al modo real para opinar':'Compartir mi experiencia'}</button><div class="detail-secondary-actions"><button class="secondary-button" id="detailSave">${icon('bookmark')} ${selectedIsSaved()?'Guardada':'Guardar'}</button><button class="secondary-button" id="detailCompare">${icon('compare')} ${selectedIsCompared()?'Quitar':'Comparar'}</button></div></div>`;
   bindDetails();
+  if(!PREVIEW_MODE){renderSectorComments();if(!commentsView.loaded&&!commentsView.loading)loadSectorComments();}
+}
+function renderSectorComments(){
+  const box=EL('communityCommentsContainer');
+  if(!box||PREVIEW_MODE)return;
+  const preview=selectedRecord()?.comments||[];
+  const shown=commentsView.loaded?commentsView.items:preview.map(text=>({text}));
+  const rows=shown.map(item=>`<p>«${escapeHtml(item.text)}»</p>`).join('');
+  const total=commentsView.total;
+  const loading=commentsView.loading;
+  const more=commentsView.loaded&&shown.length<total;
+  const retry=commentsView.error&&!loading;
+  const label=loading?'Cargando comentarios…':retry?'No se pudieron cargar los comentarios.':'Opiniones personales moderadas, no hechos comprobados.';
+  box.innerHTML=`<div class="community-comments" aria-live="polite"><strong>Comentarios de vecinos · aprobados</strong>${rows||(!loading&&!retry?'<p>Aún no hay comentarios escritos.</p>':'')}<small>${commentsView.loaded?`Mostrando ${shown.length} de ${total} comentarios. `:''}${label}</small>${more||retry?`<button type="button" id="moreSectorComments" class="secondary-button" ${loading?'disabled':''}>${retry?'Reintentar':'Ver más comentarios'}</button>`:''}</div>`;
+  EL('moreSectorComments')?.addEventListener('click',loadSectorComments);
+}
+async function loadSectorComments(){
+  const id=state.selected?.id;
+  if(PREVIEW_MODE||!id||commentsView.loading||commentsView.cellId!==id)return;
+  const seq=commentsView.seq;
+  commentsView.loading=true;commentsView.error=false;renderSectorComments();
+  try{
+    const page=await window.BarrioAPI.getSectorComments(id,commentsView.items.length,20);
+    if(seq!==commentsView.seq||state.selected?.id!==id)return;
+    commentsView.items.push(...page.comments);
+    commentsView.total=page.total;
+    commentsView.loaded=true;
+  }catch(error){
+    if(seq===commentsView.seq){commentsView.error=true;}
+  }finally{
+    if(seq===commentsView.seq){commentsView.loading=false;renderSectorComments();}
+  }
 }
 function bindDetails(){
   EL('detailRate')?.addEventListener('click',PREVIEW_MODE?()=>{location.href=location.pathname}:openRating);

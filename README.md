@@ -71,3 +71,11 @@ La caja de búsqueda admite **municipios, ciudades, pueblos y entidades de pobla
 - La cobertura de pedanías y barrios depende de los datos de origen; la app no afirma que todas las entidades existentes estén indexadas.
 
 Las fuentes de los lugares proceden de IGN/CNIG (CartoCiudad) y de OpenStreetMap/Photon. El mapa base sigue siendo © OpenStreetMap.
+
+## Comentarios completos y gestos móviles (v18)
+
+El mapa muestra los promedios de los últimos 180 días. Al consultar una zona con valoraciones aprobadas, el cliente solicita sus **comentarios aprobados** a la función `public.br_sector_comments` en páginas de 20, con el botón «Ver más comentarios» hasta agotar el histórico. No se publican mensajes pendientes/rechazados ni datos de identidad; el texto se escapa en HTML.
+
+El mapa es interactivo con un dedo para desplazarlo y tocar sectores. En móvil admite **pinza con dos dedos** para ampliar o reducir, manteniendo el punto medio como ancla. Una pinza no selecciona sectores ni abre la ficha. Los controles +/− continúan operativos y los comentarios siguen teniendo desplazamiento independiente en la ficha inferior.
+
+La migración SQL está documentada en `supabase/migrations/20261020_paginated_sector_comments.sql`. La función RPC restringe cada página a 50 elementos y valida el identificador del sector.
