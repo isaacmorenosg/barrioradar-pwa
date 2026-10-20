@@ -3,13 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f4f7f3">
+  <meta name="theme-color" content="#08191e">
   <meta name="description" content="Explora percepciones vecinales sobre tranquilidad, iluminacion y ambiente de zonas de Espana con datos transparentes y aportaciones moderadas.">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="dark">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" type="image/png" href="/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/radar-dark.css">
   <title>BarrioRadar · Conoce el barrio antes de mudarte</title>
 </head>
 <body>
@@ -50,10 +51,11 @@
             <div class="map-top-controls"><div class="map-location-chip"><span class="location-glyph"><svg class="icon"><use href="/icons.svg#map-pin"/></svg></span><span id="mapCityLabel">Huelva, España</span><svg class="icon small-icon"><use href="/icons.svg#chevron-down"/></svg></div><div class="time-segment" role="group" aria-label="Percepcion de dia o de noche"><button id="dayBtn"><svg class="icon"><use href="/icons.svg#sun"/></svg> Día</button><button id="nightBtn" class="selected"><svg class="icon"><use href="/icons.svg#moon"/></svg> Noche</button></div></div>
             <div class="map-viewport" id="mapViewport" tabindex="0" role="application" aria-label="Mapa interactivo de zonas. Arrastra para moverte, usa los controles para acercar y pulsa una zona para ver informacion."><div id="mapTiles" class="map-tiles"></div><svg id="mapOverlay" class="map-overlay" aria-hidden="true"></svg><div id="mapPlaceholders" class="map-placeholders" aria-hidden="true"></div></div>
             <div class="map-tools"><button id="zoomIn" title="Acercar" aria-label="Acercar mapa"><svg class="icon"><use href="/icons.svg#plus"/></svg></button><button id="zoomOut" title="Alejar" aria-label="Alejar mapa"><svg class="icon"><use href="/icons.svg#minus"/></svg></button><div class="tool-separator"></div><button id="myLocation" title="Mi ubicacion" aria-label="Ir a mi ubicacion"><svg class="icon"><use href="/icons.svg#crosshair"/></svg></button></div>
-            <div class="map-baseline"><div class="map-legend"><span><i class="legend-dot green"></i> Más tranquilidad</span><span><i class="legend-dot orange"></i> Opiniones mixtas</span><span><i class="legend-dot red"></i> Más reservas</span></div><div class="map-attribution"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap</a> · <a href="https://www.cartociudad.es/web/portal/directorio-de-servicios/geoprocesamiento" target="_blank" rel="noreferrer">Lugares: CartoCiudad (IGN/CNIG)</a> · <span id="mapAttributionDemo">Opiniones comunitarias</span></div></div>
+            <div class="map-baseline"><div class="map-legend" id="mapLegend"><span><i class="legend-dot green"></i> Más tranquilidad</span><span><i class="legend-dot orange"></i> Opiniones mixtas</span><span><i class="legend-dot red"></i> Más reservas</span></div><div class="map-attribution"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap</a> · <a href="https://www.cartociudad.es/web/portal/directorio-de-servicios/geoprocesamiento" target="_blank" rel="noreferrer">Lugares: CartoCiudad (IGN/CNIG)</a> · <span id="mapAttributionDemo">Opiniones comunitarias</span></div></div>
             <div class="map-loader" id="mapLoader" hidden>Buscando zona…</div>
           </div>
           <aside class="details-card" id="detailsCard" aria-label="Detalle de zona">
+            <div class="sheet-topbar"><button type="button" class="sheet-grip" id="sheetGrip" aria-label="Cerrar detalles de la zona"></button><button type="button" class="sheet-close" id="sheetClose" aria-label="Cerrar detalles">×</button></div>
             <div class="details-inner" id="detailsContent"></div>
           </aside></div>
           <div class="under-map"><div><svg class="icon"><use href="/icons.svg#shield"/></svg><span><strong>Sin etiquetas de peligro.</strong> Solo opiniones agregadas, anónimas y con su contexto.</span></div><button id="howScoring">Entender el método <svg class="icon"><use href="/icons.svg#arrow-right"/></svg></button></div>
@@ -67,12 +69,17 @@
     </div>
   </main>
 </div>
-<div class="mobile-nav" aria-label="Menu movil"><button data-view="explorar" class="active"><svg class="icon"><use href="/icons.svg#compass"/></svg><span>Mapa</span></button><button data-view="guardadas"><svg class="icon"><use href="/icons.svg#bookmark"/></svg><span>Guardadas</span></button><button data-view="comparar"><svg class="icon"><use href="/icons.svg#compare"/></svg><span>Comparar</span></button><button data-view="metodologia"><svg class="icon"><use href="/icons.svg#info"/></svg><span>Ayuda</span></button></div>
+<div id="sheetBackdrop" class="sheet-backdrop" aria-hidden="true"></div>
+<button type="button" id="mobileLegendToggle" class="mobile-legend-toggle" aria-controls="mapLegend" aria-expanded="false">◉ Colores</button>
+<button type="button" class="mobile-rate-cta" id="mobileRateCTA"><svg class="icon" aria-hidden="true"><use href="/icons.svg#message"/></svg>Compartir experiencia</button>
+<button type="button" class="mobile-sheet-chip" id="mobileSheetChip" aria-controls="detailsCard" aria-expanded="false">Ver zona <svg class="icon" aria-hidden="true"><use href="/icons.svg#chevron-right"/></svg></button>
+<div class="mobile-nav" aria-label="Menu movil"><button data-view="explorar" class="active"><svg class="icon"><use href="/icons.svg#compass"/></svg><span>Mapa</span></button><button data-view="guardadas"><svg class="icon"><use href="/icons.svg#bookmark"/></svg><span>Guardadas</span></button><button data-view="comparar"><svg class="icon"><use href="/icons.svg#compare"/></svg><span>Comparar</span></button><button data-view="metodologia"><svg class="icon"><use href="/icons.svg#info"/></svg><span>Ayuda</span></button><button type="button" id="mobileAccountButton" aria-label="Acceder a mi cuenta"><svg class="icon"><use href="/icons.svg#user"/></svg><span>Cuenta</span></button></div>
 <div id="modalRoot" class="modal-backdrop hidden" role="presentation"><div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div id="modalContent"></div></div></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.74.0/dist/umd/supabase.min.js" defer></script>
 <script src="/config.js" defer></script>
 <script src="/supabase-api.js" defer></script>
 <script src="/app.js" defer></script>
+<script src="/radar-ui.js" defer></script>
 </body>
 </html>
