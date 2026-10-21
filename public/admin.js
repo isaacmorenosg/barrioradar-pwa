@@ -1,6 +1,35 @@
 /* Moderation is checked server-side via auth.uid() + br_moderators. */
 const $ = id => document.getElementById(id);
 const escapeHTML = s => String(s).replace(/[&<>"']/g, x => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
+
+async function loadSuggestions(){
+  const panel=$('suggestionsBoard');
+  if(!panel)return;
+  try{
+    const rows=await window.BarrioAPI.adminSuggestions();
+    $('suggestionCount').textContent=rows.length+' sugerencias recibidas (hasta 200 recientes)';
+    const types={mejora:'Mejora',error:'Error',experiencia:'Experiencia',otra:'Otro'};
+    const statuses={new:'Nueva',reviewed:'Revisada',implemented:'Implementada',dismissed:'Descartada'};
+    panel.innerHTML=rows.length?rows.map(s=>`
+      <article class="card">
+        <div class="chips"><span class="chip">${escapeHTML(types[s.category]||s.category)}</span><span class="chip">${escapeHTML(statuses[s.status]||s.status)}</span></div>
+        <h3>${escapeHTML(s.title)}</h3>
+        <p class="small">Recibida: ${new Date(s.created_at).toLocaleString('es-ES')}</p>
+        <p style="white-space:pre-wrap;overflow-wrap:anywhere;color:#334155">${escapeHTML(s.body)}</p>
+        <div class="actions">
+          <button type="button" data-suggestion="${escapeHTML(s.id)}" data-status="reviewed">Revisada</button>
+          <button type="button" data-suggestion="${escapeHTML(s.id)}" data-status="implemented">Realizada</button>
+          <button type="button" class="reject" data-suggestion="${escapeHTML(s.id)}" data-status="dismissed">Descartar</button>
+        </div>
+      </article>`).join(''):'<div class="empty">Todavía no hay sugerencias.</div>';
+    panel.querySelectorAll('[data-suggestion]').forEach(btn=>btn.addEventListener('click',async()=>{
+      if(btn.disabled)return;
+      btn.disabled=true;
+      try{await window.BarrioAPI.setSuggestionStatus(btn.dataset.suggestion,btn.dataset.status);await loadSuggestions();}
+      catch(e){$('suggestionCount').textContent=e.message||'No se pudo guardar el estado.';btn.disabled=false;}
+    }));
+  }catch(e){$('suggestionCount').textContent=e.message||'No se pudieron consultar las sugerencias.';}
+}
 async function loadQueue() {
   const api = window.BarrioAPI;
   if (!api?.configured) { $('message').textContent = 'Supabase todavia no esta configurado.'; return; }
@@ -30,6 +59,7 @@ async function loadQueue() {
         </div>
       </div>`).join('') : '<div class="empty">No quedan aportaciones pendientes.</div>';
     document.querySelectorAll('[data-action]').forEach(btn => btn.addEventListener('click', () => moderate(btn)));
+    await loadSuggestions();
   } catch (err) { $('message').textContent = err.message || 'No se pudo acceder a la cola.'; }
 }
 async function moderate(btn) {

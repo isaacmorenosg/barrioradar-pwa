@@ -125,6 +125,30 @@
     if (!data?.ok) throw new Error('La valoracion no pudo guardarse.');
     return data;
   }
+
+  // Feedback is associated with an authenticated, email-verified community account.
+  async function sendSuggestion(category,title,body){
+    const user=await getCommunityUser();
+    if(!user){const err=new Error('Verifica primero tu correo en Mi cuenta para enviar una sugerencia.');err.code='LOGIN_REQUIRED';throw err;}
+    const {data,error}=await getClient().rpc('br_send_suggestion',{
+      p_category:String(category||''),p_title:String(title||'').trim(),p_body:String(body||'').trim()
+    });
+    throwIf(error);
+    if(!data?.ok)throw new Error('No se pudo guardar la sugerencia.');
+    return data;
+  }
+  async function adminSuggestions(){
+    const {data,error}=await getClient().rpc('br_admin_suggestions');
+    throwIf(error);
+    return Array.isArray(data?.rows)?data.rows:[];
+  }
+  async function setSuggestionStatus(id,status){
+    const {data,error}=await getClient().rpc('br_admin_set_suggestion_status',{
+      p_id:String(id),p_status:String(status)
+    });
+    throwIf(error);
+    if(!data?.ok)throw new Error('No se pudo actualizar la sugerencia.');
+  }
   async function logoutCommunity() {
     if (!configured) return;
     const {error} = await getClient().auth.signOut();
@@ -308,5 +332,6 @@
 
   window.BarrioAPI = Object.freeze({ configured, getRatings, getSectorComments, sendReview, hasMyReview, searchPlaces, resolvePlace,
     getCommunityUser, sendLoginEmail, confirmEmailCode, logoutCommunity, onCommunityAuthChange,
+    sendSuggestion, adminSuggestions, setSuggestionStatus,
     currentAdmin, adminQueue, moderate, logoutAdmin });
 }());
