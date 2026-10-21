@@ -209,7 +209,9 @@ function renderAllMap(){tileRender();overlayRender();}
 function ratingsStatus(message='',canRetry=false){
   const status=EL('ratingsStatus');
   if(!status)return;
-  status.hidden=!message;
+  // Routine map loading and empty-result notices belong outside the main map.
+  // Keep only actionable request errors visible, with the existing retry button.
+  status.hidden=!canRetry;
   EL('ratingsStatusText').textContent=message;
   EL('retryRatings').hidden=!canRetry;
   status.classList.toggle('is-error',canRetry);
@@ -314,7 +316,7 @@ function initMap(){
       renderAllMap();refreshRealData();
     } else {
       const loc=pointerToCoord(positionFromPointer(e));
-      if(loc.lat>=27&&loc.lat<=44.5&&loc.lng>=-18.5&&loc.lng<=5){state.selected=cellAt(loc.lat,loc.lng);state.userSelected=true;overlayRender();renderDetails();}
+      if(loc.lat>=27&&loc.lat<=44.5&&loc.lng>=-18.5&&loc.lng<=5){state.selected=cellAt(loc.lat,loc.lng);state.userSelected=true;overlayRender();renderDetails();document.dispatchEvent(new Event('zonenta:sector-selected'));}
     }
   };
   map.viewport.addEventListener('pointerup',endDrag);
@@ -323,7 +325,7 @@ function initMap(){
   map.viewport.addEventListener('keydown',e=>{
     if(e.key==='+'||e.key==='='){e.preventDefault();changeZoom(1);return;}
     if(e.key==='-'){e.preventDefault();changeZoom(-1);return;}
-    if(e.key==='Enter'){e.preventDefault();state.selected=cellAt(state.center.lat,state.center.lng);state.userSelected=true;overlayRender();renderDetails();return;}
+    if(e.key==='Enter'){e.preventDefault();state.selected=cellAt(state.center.lat,state.center.lng);state.userSelected=true;overlayRender();renderDetails();document.dispatchEvent(new Event('zonenta:sector-selected'));return;}
     const directions={ArrowLeft:[-90,0],ArrowRight:[90,0],ArrowUp:[0,-90],ArrowDown:[0,90]};
     if(directions[e.key]){e.preventDefault();const [dx,dy]=directions[e.key];const center=toPx(state.center.lat,state.center.lng,state.zoom);state.center=pxToLL(center.x+dx,center.y+dy,state.zoom);renderAllMap();refreshRealData();}
   });

@@ -349,3 +349,48 @@ button[aria-busy="true"] .zonenta-spinner{color:inherit;width:14px;height:14px;f
 @media (min-width:761px) and (max-height:600px){
  body.map-view-active #mobileRateCTA,body.map-view-active #mobileSheetChip{bottom:12px;min-height:40px}
 }
+
+
+/* v41: desktop zone opinions on selection; keep the map clear in every orientation. */
+@media (min-width:761px){
+  /* The mobile-only summary had no desktop typography and was overlapping its text. */
+  body.map-view-active #viewExplorar .mobile-sector-preview:not([hidden]){
+    display:none!important;
+  }
+  /* Desktop: the review panel is a non-modal, closeable sidebar. */
+  body.map-view-active.sheet-open #viewExplorar .details-card{
+    overflow-x:hidden;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+  }
+  body.map-view-active.sheet-open #viewExplorar .details-card .sheet-topbar{
+    display:flex!important;
+    align-items:center;
+    justify-content:flex-end;
+    background:#fff;
+    border-bottom:1px solid #E1E7F0;
+  }
+  body.map-view-active.sheet-open #viewExplorar .details-card .sheet-close{
+    display:grid!important;
+    place-items:center;
+    position:relative;
+    inset:auto;
+    margin:6px 10px;
+    width:35px;
+    height:35px;
+    border:1px solid #DDE6F1;
+    border-radius:10px;
+    background:#F4F7FB;
+    color:#0F2D5B;
+    font-size:20px;
+    cursor:pointer;
+  }
+  /* Allow selecting more areas on the map while the details stay open. */
+  body.map-view-active.sheet-open #sheetBackdrop{
+    display:none!important;
+  }
+}
+@media (max-width:760px) and (orientation:landscape){
+  /* Landscape phones use Ver zona instead of a bulky on-map summary. */
+  body.map-view-active #mobileSectorPreview:not([hidden]){display:none!important}
+}

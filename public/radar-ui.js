@@ -12,6 +12,9 @@
     const navAccount = $('mobileAccountButton');
     if (!sheet || !map || !showButton || !overlay) return;
     const mobile = window.matchMedia('(max-width:760px)');
+    // A mouse/trackpad on a wide screen should reveal opinions as soon as a zone is selected.
+    // Touch devices, including landscape phones, still use the explicit Ver zona action.
+    const desktopAutoDetails = window.matchMedia('(min-width:761px) and (hover:hover) and (pointer:fine)');
     const mapFirst = () => document.body.classList.contains('map-view-active');
     const isOpen = () => document.body.classList.contains('sheet-open');
     const setOpen = (open, focus) => {
@@ -39,6 +42,9 @@
     else if (mobile.addListener) mobile.addListener(resetForSize);
     // Map touches only select a sector; opening the sheet requires 'Ver zona'.
     showButton.addEventListener('click',()=>{if(!showButton.disabled)setOpen(true,true);});
+    document.addEventListener('zonenta:sector-selected',()=>{
+      if(desktopAutoDetails.matches && mapFirst())setOpen(true,false);
+    });
     dismiss?.addEventListener('click',()=>setOpen(false,true));
     overlay.addEventListener('click',()=>setOpen(false,false));
     $('sheetGrip')?.addEventListener('click',()=>setOpen(false,true));
