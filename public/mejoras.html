@@ -1,39 +1,63 @@
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0F2D5B">
-<title>Enviar una sugerencia · Zonenta</title>
-<link rel="icon" type="image/svg+xml" href="/icons/zonenta-brand-icon.svg">
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#F8F9FB"><meta name="color-scheme" content="light">
+<title>Sugerencias · Zonenta</title><link rel="icon" type="image/svg+xml" href="/icons/zonenta-brand-icon.svg">
+<link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/radar-dark.css"><link rel="stylesheet" href="/mobile-sheet-fix.css"><link rel="stylesheet" href="/radar-light.css"><link rel="stylesheet" href="/zonenta-theme.css">
 <style>
-:root{font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#0F2D5B;background:#F8F9FB}
-*{box-sizing:border-box}body{margin:0;min-height:100vh}button,input,textarea,select{font:inherit}a{color:#A94524}
-header{background:#0F2D5B;padding:19px max(18px,calc((100vw - 850px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px}
-header img{display:block;width:154px;height:auto;background:#fff;border-radius:8px;padding:6px}
-header a.return{color:#fff;text-decoration:none;font-size:13px;font-weight:700}
-main{max-width:700px;margin:35px auto;padding:0 18px 55px}
-.kicker{font-weight:800;color:#DB552F;font-size:11px;letter-spacing:1.3px}
-h1{font-size:clamp(28px,5vw,42px);letter-spacing:-1.4px;line-height:1.12;margin:12px 0}h1 em{font-style:normal;color:#FF6B3D}
-.intro{font-size:15px;line-height:1.75;color:#64748B;margin:15px 0 25px}
-.card{background:#fff;border-radius:18px;box-shadow:0 15px 45px #0f2d5b12;border:1px solid #E2E8F0;padding:25px}
-form{display:grid;gap:18px}.field{display:grid;gap:8px}label{font-size:13px;font-weight:750;color:#0F2D5B}
-input,select,textarea{width:100%;border:1px solid #CCD6E3;border-radius:10px;padding:13px 14px;background:#fff;color:#24364B;outline-offset:3px}
-textarea{min-height:165px;line-height:1.6;resize:vertical}input:focus,select:focus,textarea:focus{border-color:#FF6B3D;outline:2px solid #ff6b3d22}
-.hint{font-size:12px;color:#64748B;line-height:1.6}
-.button{border:0;display:inline-block;text-align:center;border-radius:10px;padding:15px 20px;font-weight:750;cursor:pointer;text-decoration:none}
-.button.primary{background:#FF6B3D;color:#fff}.button.primary:hover{background:#E45D35}.button:disabled{opacity:.55;cursor:wait}
-.muted{font-size:13px;color:#64748B;line-height:1.7}
-.panel-title{font-size:21px;margin:0 0 14px}.status{font-size:13px;line-height:1.6;margin-top:12px;min-height:15px;color:#0F2D5B}
-.success{padding:20px;border-radius:12px;background:#EFF8F3;color:#1F6945;line-height:1.7}
-.form-meta{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-footer{max-width:700px;margin:0 auto;padding:0 18px 35px;font-size:12px;color:#64748B;text-align:center}
-[hidden]{display:none!important}
-@media(max-width:500px){main{margin:25px auto}.card{padding:19px}header img{width:130px}header a.return{font-size:12px}}
+.feedback-view .feedback-wrap{width:min(100%,720px);margin:0 auto;padding:28px 0 42px}
+.feedback-view .kicker{font-size:11px;font-weight:800;letter-spacing:1.3px;color:#db552f}
+.feedback-view h1{font-size:clamp(28px,4vw,40px);letter-spacing:-1.1px;line-height:1.15;margin:12px 0}
+.feedback-view h1 em{font-style:normal;color:#FF6B3D}
+.feedback-view .intro{font-size:15px;line-height:1.75;color:#64748B;margin:15px 0 25px}
+.feedback-view .card{background:#fff;border:1px solid #E2E8F0;border-radius:16px;box-shadow:0 15px 45px #0f2d5b12;padding:25px}
+.feedback-view form{display:grid;gap:18px}
+.feedback-view .field{display:grid;gap:8px}
+.feedback-view label{font-size:13px;font-weight:750;color:#0F2D5B}
+.feedback-view input,.feedback-view select,.feedback-view textarea{width:100%;border:1px solid #CCD6E3;border-radius:10px;padding:13px 14px;background:#fff;color:#24364B;font:inherit;outline-offset:3px}
+.feedback-view textarea{min-height:165px;line-height:1.6;resize:vertical}
+.feedback-view input:focus,.feedback-view select:focus,.feedback-view textarea:focus{border-color:#FF6B3D;outline:2px solid #ff6b3d22}
+.feedback-view .hint{font-size:12px;color:#64748B;line-height:1.6}
+.feedback-view .button{border:0;display:inline-block;text-align:center;border-radius:10px;padding:15px 20px;font-weight:750;cursor:pointer;text-decoration:none}
+.feedback-view .button.primary{background:#FF6B3D;color:#fff}
+.feedback-view .button:disabled{opacity:.55;cursor:wait}
+.feedback-view .muted{font-size:13px;color:#64748B;line-height:1.7}
+.feedback-view .panel-title{font-size:21px;margin:0 0 14px}
+.feedback-view .status{font-size:13px;line-height:1.6;margin-top:12px;min-height:15px;color:#0F2D5B}
+.feedback-view .success{padding:20px;border-radius:12px;background:#EFF8F3;color:#1F6945;line-height:1.7}
+.feedback-view .form-meta{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.feedback-view [hidden]{display:none!important}
+.feedback-view .topbar-crumb>a{color:inherit;text-decoration:none}
+.feedback-view .sidebar-nav a.nav-link{display:flex;text-decoration:none}
+.feedback-view .mobile-nav>a{flex:1;min-width:0;display:grid;gap:4px;justify-items:center;align-content:center;text-decoration:none;color:#6A7B90;font-size:9px;font-weight:780}
+.feedback-view .mobile-nav>a .icon{width:21px;height:21px}
+@media(max-width:760px){.feedback-view .feedback-wrap{padding:22px 0 42px}.feedback-view .card{padding:19px}.feedback-view .sidebar{display:none}.feedback-view .main-content{margin-left:0;width:100%}.feedback-view .topbar-crumb .topbar-mobile-brand{display:flex}.feedback-view .topbar .mobile-menu{display:none}.feedback-view .content-pad{padding-bottom:85px}}
 </style>
 </head>
-<body>
-<header><a href="/" aria-label="Zonenta, volver al mapa"><img src="/icons/zonenta-lockup.svg" width="154" alt="Zonenta"></a><a class="return" href="/">← Volver al mapa</a></header>
-<main>
+<body class="feedback-view">
+<div class="app-shell" id="appShell">
+<aside class="sidebar" aria-label="Navegacion principal">
+    <div class="brand"><a class="zonenta-brand" href="/" aria-label="Zonenta, inicio"><img src="/icons/zonenta-lockup.svg" width="188" height="67" alt="Zonenta. Conoce el lugar antes de elegirlo."></a></div>
+    <div class="sidebar-section-caption">TU ESPACIO</div>
+    <nav class="sidebar-nav" aria-label="Secciones">
+      <a class="nav-link" href="/" ><svg class="icon"><use href="/icons.svg#compass"/></svg><span>Explorar mapa</span><span class="nav-dot"></span></a>
+      <a class="nav-link" href="/#guardadas" ><svg class="icon"><use href="/icons.svg#bookmark"/></svg><span>Zonas guardadas</span><span class="nav-count" id="savedCount">0</span></a>
+      <a class="nav-link" href="/#comparar" ><svg class="icon"><use href="/icons.svg#compare"/></svg><span>Comparar zonas</span><span class="nav-count" id="compareCount">0</span></a>
+    </nav>
+    <div class="sidebar-section-caption sidebar-second">DESCUBRE</div>
+    <nav class="sidebar-nav">
+      <a class="nav-link" href="/#metodologia" ><svg class="icon"><use href="/icons.svg#info"/></svg><span>Cómo funciona</span></a>
+      <button class="nav-link" id="installApp"><svg class="icon"><use href="/icons.svg#download"/></svg><span>Instalar aplicación</span></button><a class="nav-link" href="/mejoras.html" style="text-decoration:none"><svg class="icon"><use href="/icons.svg#message"/></svg><span>Enviar sugerencia</span></a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="plus-tile"><div class="plus-abstract"><span></span><span></span><span></span></div><div class="plus-overline">PRÓXIMAMENTE · PLUS</div><strong>Decide con más<br>información.</strong><p>Informes por vivienda, evolución y alertas.</p><button id="planBtn">Conocer el plan <svg class="icon"><use href="/icons.svg#arrow-right"/></svg></a></div>
+      <div class="bottom-note"><span class="online-dot"></span> Datos con transparencia <svg class="icon"><use href="/icons.svg#shield"/></svg></div>
+    </div>
+  </aside>
+<main class="main-content">
+<header class="topbar">
+      <div class="topbar-crumb"><a class="topbar-mobile-brand" href="/" aria-label="Zonenta, inicio"><img class="topbar-mobile-logo" src="/icons/zonenta-lockup.svg" width="150" height="53" alt="Zonenta. Conoce el lugar antes de elegirlo."></a><span>Tu espacio</span><svg class="icon crumb-chevron"><use href="/icons.svg#chevron-right"/></svg><strong id="crumbCity">Sugerencias</strong></div>
+      <div class="header-right"><span class="topbar-flag">ES <span>•</span> ESPAÑA</span><a class="header-account" href="/">Mi cuenta</a></div>
+    </header>
+<div class="content-pad"><div class="feedback-wrap">
 <div class="kicker">AYÚDANOS A MEJORAR</div><h1>Tu idea puede hacer <em>mejor Zonenta.</em></h1>
 <p class="intro">¿Echas en falta alguna función? ¿Has detectado un error? Cuéntanoslo. Leemos las propuestas para seguir mejorando la aplicación.</p>
 <section class="card" id="loadingPanel"><p class="muted">Comprobando tu sesión…</p></section>
@@ -56,10 +80,12 @@ footer{max-width:700px;margin:0 auto;padding:0 18px 35px;font-size:12px;color:#6
 <p class="hint">Tu propuesta quedará registrada para su revisión. Por seguridad, puedes enviar un máximo de 5 sugerencias cada 24 horas.</p>
 </section>
 <section id="successPanel" class="card" hidden><div class="success"><strong>¡Gracias por tu propuesta!</strong><p>Tu sugerencia se ha registrado correctamente y llegará a nuestro panel de gestión.</p></div><p><a class="button primary" href="/" style="margin-top:16px">Volver al mapa</a></p><button id="againBtn" class="button" type="button" style="background:#F1F5F9;margin-top:8px">Enviar otra sugerencia</button></section>
-</main>
-<footer>© 2026 Zonenta · <a href="/privacidad.html">Privacidad y uso responsable</a></footer>
+
+</div><footer class="footer"><span>© 2026 Zonenta · Hecho para explorar sin prejuicios.</span><div><a href="/">Metodología</a><span>•</span><a href="/mejoras.html">Sugerencias</a><span>•</span><a href="/privacidad.html">Privacidad</a><span>•</span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">Mapas © OSM</a></div></footer></div></main></div>
+<div class="mobile-nav" aria-label="Menú móvil"><a href="/"><svg class="icon"><use href="/icons.svg#compass"/></svg><span>Mapa</span></a><a href="/#guardadas"><svg class="icon"><use href="/icons.svg#bookmark"/></svg><span>Guardadas</span></a><a href="/#comparar"><svg class="icon"><use href="/icons.svg#compare"/></svg><span>Comparar</span></a><a href="/#metodologia"><svg class="icon"><use href="/icons.svg#info"/></svg><span>Ayuda</span></a><a href="/"><svg class="icon"><use href="/icons.svg#user"/></svg><span>Cuenta</span></a><a href="/mejoras.html" aria-current="page" style="color:#FF6B3D"><svg class="icon"><use href="/icons.svg#message"/></svg><span>Ideas</span></a></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.74.0/dist/umd/supabase.min.js" defer></script>
-<script src="/config.js" defer></script><script src="/supabase-api.js" defer></script>
+<script src="/config.js" defer></script>
+<script src="/supabase-api.js?v=20261021-feedback2" defer></script>
 <script>
 const byId=id=>document.getElementById(id);
 function show(id){['loadingPanel','loginPanel','feedbackPanel','successPanel'].forEach(s=>byId(s).hidden=s!==id);}
@@ -77,7 +103,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  byId('body').addEventListener('input',()=>{byId('counter').textContent=byId('body').value.length+' / 2000';});
  byId('loginForm').addEventListener('submit',async ev=>{
    ev.preventDefault();const b=byId('loginBtn');if(b.disabled)return;b.disabled=true;byId('loginStatus').textContent='Enviando…';
-   try{await window.BarrioAPI.sendLoginEmail(byId('loginEmail').value.trim());byId('loginStatus').textContent='Te hemos enviado el enlace de acceso. Comprueba también la carpeta de spam.';}
+   try{await window.BarrioAPI.sendLoginEmail(byId('loginEmail').value.trim(),'/mejoras.html');byId('loginStatus').textContent='Te hemos enviado el enlace de acceso. Comprueba también la carpeta de spam.';}
    catch(e){byId('loginStatus').textContent=e.message||'No se pudo enviar el enlace.';}
    finally{b.disabled=false;}
  });
@@ -86,7 +112,8 @@ document.addEventListener('DOMContentLoaded',()=>{
    const title=byId('title').value.trim(),body=byId('body').value.trim();
    if(title.length<5||body.length<20){byId('feedbackStatus').textContent='Revisa el asunto y la descripción antes de enviar.';return;}
    b.disabled=true;byId('feedbackStatus').textContent='Guardando tu propuesta…';
-   try{await window.BarrioAPI.sendSuggestion(byId('category').value,title,body);byId('feedbackStatus').textContent='';show('successPanel');}
+   try{if(typeof window.BarrioAPI?.sendSuggestion!=='function')throw new Error('Actualiza la página para cargar la última versión de Zonenta.');
+   await window.BarrioAPI.sendSuggestion(byId('category').value,title,body);byId('feedbackStatus').textContent='';show('successPanel');}
    catch(e){byId('feedbackStatus').textContent=e.message||'No se pudo guardar la propuesta. Inténtalo de nuevo.';}
    finally{b.disabled=false;}
  });
