@@ -332,7 +332,8 @@ button[aria-busy="true"] .zonenta-spinner{color:inherit;width:14px;height:14px;f
 /* Floating map actions on wide screens, without a permanent details sidebar. */
 @media (min-width:761px){
  body.map-view-active #mobileRateCTA,body.map-view-active #mobileSheetChip{
-   display:inline-flex!important;position:fixed;bottom:28px;z-index:22;
+   /* Above the map's credit/legend strip: never cover the white attribution line. */
+   display:inline-flex!important;position:fixed;bottom:calc(94px + env(safe-area-inset-bottom));z-index:22;
    min-height:46px;align-items:center;justify-content:center;gap:8px;
    border-radius:999px;padding:0 19px;font-size:12px;font-weight:800;
    box-shadow:0 8px 25px rgba(15,45,91,.2);
@@ -347,7 +348,7 @@ button[aria-busy="true"] .zonenta-spinner{color:inherit;width:14px;height:14px;f
  body.map-view-active #viewExplorar .mobile-sector-preview:not([hidden]){top:12px}
 }
 @media (min-width:761px) and (max-height:600px){
- body.map-view-active #mobileRateCTA,body.map-view-active #mobileSheetChip{bottom:12px;min-height:40px}
+ body.map-view-active #mobileRateCTA,body.map-view-active #mobileSheetChip{bottom:calc(78px + env(safe-area-inset-bottom));min-height:40px}
 }
 
 
