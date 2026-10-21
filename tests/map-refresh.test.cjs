@@ -14,7 +14,7 @@ const extract=(start,end)=>{
 };
 const refresh=extract('async function refreshRealData(){','function escapeHtml(');
 const changeView=extract('function changeView(view){','function renderSavedPage(');
-const chooseLocation=extract('function chooseLocation(place,zoom=14){','async function refreshRealData(){');
+const chooseLocation=extract('function chooseLocation(place,zoom=14,automatic=false){','async function refreshRealData(){');
 
 function harness(getRatings,initialCells=[]){
   const statuses=[];
@@ -45,7 +45,7 @@ test('Returning from comparison schedules data loading after the view is visible
     state:{view:'comparar'},
     EL:()=>({classList:{toggle(){},contains(){return false;}},setAttribute(){}}),
     document:{querySelectorAll:()=>[],body:{classList:{toggle(){}}}},window:{scrollTo(){}},
-    scheduleMapRefresh(){refreshes++;},cancelRatingsRequest(){},
+    scheduleMapRefresh(){refreshes++;},markLocationIntent(){},cancelRatingsRequest(){},
     ratingsStatus(){},renderSavedPage(){},renderComparePage(){}
   };
   vm.runInNewContext(changeView,ctx);
@@ -60,7 +60,7 @@ test('Compared or saved sector in the same city retains current ratings until re
   const previous=[sample()];
   const state={view:'comparar',city:'Huelva',realCells:previous,center:{lat:37,lng:-7},zoom:14};
   let changed=0,canceled=0;
-  const ctx={state,cancelRatingsRequest(){canceled++;},cellAt:(lat,lng)=>({id:'11:22',lat,lng}),
+  const ctx={state,markLocationIntent(){},cancelRatingsRequest(){canceled++;},cellAt:(lat,lng)=>({id:'11:22',lat,lng}),
     syncCityLabels(){},EL:()=>({value:''}),changeView(){changed++;},renderDetails(){},renderCounters(){}};
   vm.runInNewContext(chooseLocation,ctx);
   ctx.chooseLocation({name:'Huelva',lat:37.25,lng:-6.95},14);

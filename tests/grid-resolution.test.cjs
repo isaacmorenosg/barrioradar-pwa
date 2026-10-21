@@ -18,7 +18,7 @@ function prepare() {
 const {geom,storage}=prepare();
 assert.equal(geom.HEX,200,'Grid radius must be 200 Web Mercator metres');
 assert.match(app,/zoom:14/,'Default zoom must help select smaller hexes');
-assert.match(app,/function chooseLocation\(place,zoom=14\)/,'Search results should open with the new zoom');
+assert.match(app,/function chooseLocation\(place,zoom=14,automatic=false\)/,'Search results should open with the new zoom');
 for(const [q,r] of [[100,200],[-4845,7459],[-100,-100],[0,0]]){
  const oldXY={x:400*Math.sqrt(3)*(q+r/2),y:600*r};
  const oldCenter=geom.toLL(oldXY.x,oldXY.y);
