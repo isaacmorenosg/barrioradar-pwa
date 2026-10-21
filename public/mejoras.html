@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0F2D5B">
+<title>Enviar una sugerencia · Zonenta</title>
+<link rel="icon" type="image/svg+xml" href="/icons/zonenta-brand-icon.svg">
+<style>
+:root{font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#0F2D5B;background:#F8F9FB}
+*{box-sizing:border-box}body{margin:0;min-height:100vh}button,input,textarea,select{font:inherit}a{color:#A94524}
+header{background:#0F2D5B;padding:19px max(18px,calc((100vw - 850px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px}
+header img{display:block;width:154px;height:auto;background:#fff;border-radius:8px;padding:6px}
+header a.return{color:#fff;text-decoration:none;font-size:13px;font-weight:700}
+main{max-width:700px;margin:35px auto;padding:0 18px 55px}
+.kicker{font-weight:800;color:#DB552F;font-size:11px;letter-spacing:1.3px}
+h1{font-size:clamp(28px,5vw,42px);letter-spacing:-1.4px;line-height:1.12;margin:12px 0}h1 em{font-style:normal;color:#FF6B3D}
+.intro{font-size:15px;line-height:1.75;color:#64748B;margin:15px 0 25px}
+.card{background:#fff;border-radius:18px;box-shadow:0 15px 45px #0f2d5b12;border:1px solid #E2E8F0;padding:25px}
+form{display:grid;gap:18px}.field{display:grid;gap:8px}label{font-size:13px;font-weight:750;color:#0F2D5B}
+input,select,textarea{width:100%;border:1px solid #CCD6E3;border-radius:10px;padding:13px 14px;background:#fff;color:#24364B;outline-offset:3px}
+textarea{min-height:165px;line-height:1.6;resize:vertical}input:focus,select:focus,textarea:focus{border-color:#FF6B3D;outline:2px solid #ff6b3d22}
+.hint{font-size:12px;color:#64748B;line-height:1.6}
+.button{border:0;display:inline-block;text-align:center;border-radius:10px;padding:15px 20px;font-weight:750;cursor:pointer;text-decoration:none}
+.button.primary{background:#FF6B3D;color:#fff}.button.primary:hover{background:#E45D35}.button:disabled{opacity:.55;cursor:wait}
+.muted{font-size:13px;color:#64748B;line-height:1.7}
+.panel-title{font-size:21px;margin:0 0 14px}.status{font-size:13px;line-height:1.6;margin-top:12px;min-height:15px;color:#0F2D5B}
+.success{padding:20px;border-radius:12px;background:#EFF8F3;color:#1F6945;line-height:1.7}
+.form-meta{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+footer{max-width:700px;margin:0 auto;padding:0 18px 35px;font-size:12px;color:#64748B;text-align:center}
+[hidden]{display:none!important}
+@media(max-width:500px){main{margin:25px auto}.card{padding:19px}header img{width:130px}header a.return{font-size:12px}}
+</style>
+</head>
+<body>
+<header><a href="/" aria-label="Zonenta, volver al mapa"><img src="/icons/zonenta-lockup.svg" width="154" alt="Zonenta"></a><a class="return" href="/">← Volver al mapa</a></header>
+<main>
+<div class="kicker">AYÚDANOS A MEJORAR</div><h1>Tu idea puede hacer <em>mejor Zonenta.</em></h1>
+<p class="intro">¿Echas en falta alguna función? ¿Has detectado un error? Cuéntanoslo. Leemos las propuestas para seguir mejorando la aplicación.</p>
+<section class="card" id="loadingPanel"><p class="muted">Comprobando tu sesión…</p></section>
+<section class="card" id="loginPanel" hidden>
+<h2 class="panel-title">Identifícate para enviar tu idea</h2>
+<p class="muted">Para evitar envíos automáticos, las sugerencias se aceptan desde cuentas con correo verificado. Tu dirección no será pública.</p>
+<form id="loginForm"><div class="field"><label for="loginEmail">Correo electrónico</label><input id="loginEmail" type="email" required autocomplete="email" placeholder="tu@correo.es" maxlength="254"></div><button class="button primary" id="loginBtn" type="submit">Recibir enlace de acceso</button></form>
+<div class="status" id="loginStatus" role="status" aria-live="polite"></div>
+<p class="hint">Cuando abras el enlace del correo volverás al mapa. Después entra de nuevo en «Ideas» para escribir tu propuesta.</p>
+</section>
+<section class="card" id="feedbackPanel" hidden>
+<div class="form-meta"><h2 class="panel-title">Enviar sugerencia</h2><span class="hint" id="accountEmail"></span></div>
+<form id="feedbackForm">
+<div class="field"><label for="category">¿De qué trata tu propuesta?</label><select id="category" required><option value="mejora">Nueva función o mejora</option><option value="error">Problema o error</option><option value="experiencia">Experiencia de uso</option><option value="otra">Otra sugerencia</option></select></div>
+<div class="field"><label for="title">Asunto</label><input id="title" type="text" maxlength="120" minlength="5" placeholder="Resume tu propuesta en pocas palabras" required></div>
+<div class="field"><label for="body">Cuéntanos tu idea</label><textarea id="body" minlength="20" maxlength="2000" required placeholder="¿Qué cambiarías? ¿Cómo crees que podría funcionar?"></textarea><div class="form-meta"><span class="hint">Mínimo 20 caracteres. No incluyas datos personales de terceros.</span><span class="hint" id="counter">0 / 2000</span></div></div>
+<button class="button primary" type="submit" id="sendBtn">Enviar sugerencia</button>
+<div id="feedbackStatus" class="status" aria-live="polite" role="status"></div>
+</form>
+<p class="hint">Tu propuesta quedará registrada para su revisión. Por seguridad, puedes enviar un máximo de 5 sugerencias cada 24 horas.</p>
+</section>
+<section id="successPanel" class="card" hidden><div class="success"><strong>¡Gracias por tu propuesta!</strong><p>Tu sugerencia se ha registrado correctamente y llegará a nuestro panel de gestión.</p></div><p><a class="button primary" href="/" style="margin-top:16px">Volver al mapa</a></p><button id="againBtn" class="button" type="button" style="background:#F1F5F9;margin-top:8px">Enviar otra sugerencia</button></section>
+</main>
+<footer>© 2026 Zonenta · <a href="/privacidad.html">Privacidad y uso responsable</a></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.74.0/dist/umd/supabase.min.js" defer></script>
+<script src="/config.js" defer></script><script src="/supabase-api.js" defer></script>
+<script>
+const byId=id=>document.getElementById(id);
+function show(id){['loadingPanel','loginPanel','feedbackPanel','successPanel'].forEach(s=>byId(s).hidden=s!==id);}
+async function checkSession(){
+ const api=window.BarrioAPI;
+ if(!api?.configured){show('loginPanel');byId('loginStatus').textContent='No se puede conectar con el servicio. Inténtalo más tarde.';byId('loginBtn').disabled=true;return;}
+ try{
+  const user=await api.getCommunityUser();
+  if(!user){show('loginPanel');return;}
+  byId('accountEmail').textContent=user.email;
+  show('feedbackPanel');
+ }catch(e){show('loginPanel');byId('loginStatus').textContent='No se pudo verificar tu sesión. Inténtalo de nuevo.';}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+ byId('body').addEventListener('input',()=>{byId('counter').textContent=byId('body').value.length+' / 2000';});
+ byId('loginForm').addEventListener('submit',async ev=>{
+   ev.preventDefault();const b=byId('loginBtn');if(b.disabled)return;b.disabled=true;byId('loginStatus').textContent='Enviando…';
+   try{await window.BarrioAPI.sendLoginEmail(byId('loginEmail').value.trim());byId('loginStatus').textContent='Te hemos enviado el enlace de acceso. Comprueba también la carpeta de spam.';}
+   catch(e){byId('loginStatus').textContent=e.message||'No se pudo enviar el enlace.';}
+   finally{b.disabled=false;}
+ });
+ byId('feedbackForm').addEventListener('submit',async ev=>{
+   ev.preventDefault();const b=byId('sendBtn');if(b.disabled)return;
+   const title=byId('title').value.trim(),body=byId('body').value.trim();
+   if(title.length<5||body.length<20){byId('feedbackStatus').textContent='Revisa el asunto y la descripción antes de enviar.';return;}
+   b.disabled=true;byId('feedbackStatus').textContent='Guardando tu propuesta…';
+   try{await window.BarrioAPI.sendSuggestion(byId('category').value,title,body);byId('feedbackStatus').textContent='';show('successPanel');}
+   catch(e){byId('feedbackStatus').textContent=e.message||'No se pudo guardar la propuesta. Inténtalo de nuevo.';}
+   finally{b.disabled=false;}
+ });
+ byId('againBtn').addEventListener('click',()=>{byId('feedbackForm').reset();byId('counter').textContent='0 / 2000';show('feedbackPanel');});
+ checkSession();
+});
+</script>
+</body></html>
