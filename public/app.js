@@ -143,6 +143,68 @@ const map={viewport:null,tiles:null,overlay:null,w:0,h:0,drag:null,readSeq:0,rat
 const commentsView={cellId:null,items:[],total:0,loaded:false,loading:false,error:false,seq:0};
 let toastTimer=0;
 function toast(message){const el=EL('toast');el.textContent=message;el.classList.add('shown');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('shown'),3300);}
+
+/* Geolocate in the browser on mobile or desktop. No coordinate is persisted. */
+const GEOLOCATION_TIMEOUT_MS=9000;
+const GEOLOCATION_DEADLINE_MS=20000;
+let locationIntent=0;
+let locationRequest=0;
+function markLocationIntent(){locationIntent++;}
+function placeFromGeolocation(position){
+  const lat=Number(position?.coords?.latitude),lng=Number(position?.coords?.longitude);
+  if(!Number.isFinite(lat)||!Number.isFinite(lng)||lat<27||lat>44.5||lng< -18.5||lng>5)return null;
+  return {name:'Mi ubicación',lat,lng};
+}
+function locateUser(automatic=false){
+  if(automatic&&PREVIEW_MODE)return;
+  if(!automatic)markLocationIntent();
+  if(!navigator.geolocation||typeof navigator.geolocation.getCurrentPosition!=='function'){
+    if(!automatic)toast('Este dispositivo no permite consultar la ubicación.');
+    return;
+  }
+  const intent=locationIntent,request=++locationRequest;
+  const button=automatic?null:EL('myLocation');
+  if(button){
+    button.disabled=true;
+    button.classList.add('is-locating');
+    button.setAttribute('aria-busy','true');
+  }
+  let deadline;
+  const finish=()=>{
+    if(request!==locationRequest)return false;
+    clearTimeout(deadline);
+    if(button){
+      button.disabled=false;
+      button.classList.remove('is-locating');
+      button.removeAttribute('aria-busy');
+    }
+    return true;
+  };
+  deadline=setTimeout(()=>{
+    if(!finish())return;
+    locationRequest++;
+    if(!automatic)toast('La ubicación tarda demasiado. Prueba de nuevo.');
+  },GEOLOCATION_DEADLINE_MS);
+  try{
+    navigator.geolocation.getCurrentPosition(position=>{
+      if(!finish())return;
+      if(intent!==locationIntent)return;
+      if(automatic&&(state.view!=='explorar'||state.userSelected))return;
+      const place=placeFromGeolocation(position);
+      if(!place){
+        if(!automatic)toast('La ubicación parece estar fuera de España.');
+        return;
+      }
+      chooseLocation(place,14,automatic);
+    },()=>{
+      if(!finish())return;
+      if(!automatic)toast('No se pudo acceder a tu ubicación. Comprueba los permisos.');
+    },{timeout:GEOLOCATION_TIMEOUT_MS,enableHighAccuracy:!automatic,maximumAge:automatic?120000:30000});
+  }catch{
+    if(finish()&&!automatic)toast('No se pudo consultar tu ubicación.');
+  }
+}
+
 function activeCells(){return state.realCells;}
 function scoreColor(value){if(value>=3.7)return {fill:'#7fc99b',stroke:'#4eab7a',label:'Favorable',text:'#246246'};if(value>=2.8)return{fill:'#f5bd75',stroke:'#df9d48',label:'Intermedio',text:'#78572d'};return{fill:'#ed9d8a',stroke:'#d87c6b',label:'Desfavorable',text:'#824337'};}
 function currentScore(item){
@@ -263,6 +325,7 @@ function initMap(){
   };
   map.viewport.addEventListener('pointerdown',e=>{
     if(e.button!==0&&e.pointerType==='mouse')return;
+    markLocationIntent(); // Any map touch should take priority over a late GPS response.
     activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
     map.viewport.setPointerCapture(e.pointerId);
     if(activePointers.size>=2){
@@ -325,22 +388,16 @@ function initMap(){
   map.viewport.addEventListener('keydown',e=>{
     if(e.key==='+'||e.key==='='){e.preventDefault();changeZoom(1);return;}
     if(e.key==='-'){e.preventDefault();changeZoom(-1);return;}
-    if(e.key==='Enter'){e.preventDefault();state.selected=cellAt(state.center.lat,state.center.lng);state.userSelected=true;overlayRender();renderDetails();document.dispatchEvent(new Event('zonenta:sector-selected'));return;}
+    if(e.key==='Enter'){e.preventDefault();markLocationIntent();state.selected=cellAt(state.center.lat,state.center.lng);state.userSelected=true;overlayRender();renderDetails();document.dispatchEvent(new Event('zonenta:sector-selected'));return;}
     const directions={ArrowLeft:[-90,0],ArrowRight:[90,0],ArrowUp:[0,-90],ArrowDown:[0,90]};
-    if(directions[e.key]){e.preventDefault();const [dx,dy]=directions[e.key];const center=toPx(state.center.lat,state.center.lng,state.zoom);state.center=pxToLL(center.x+dx,center.y+dy,state.zoom);renderAllMap();refreshRealData();}
+    if(directions[e.key]){e.preventDefault();markLocationIntent();const [dx,dy]=directions[e.key];const center=toPx(state.center.lat,state.center.lng,state.zoom);state.center=pxToLL(center.x+dx,center.y+dy,state.zoom);renderAllMap();refreshRealData();}
   });
   EL('zoomIn').addEventListener('click',()=>changeZoom(1));
   EL('zoomOut').addEventListener('click',()=>changeZoom(-1));
-  EL('myLocation').addEventListener('click',()=>{
-    if(!navigator.geolocation){toast('Este dispositivo no permite consultar la ubicación');return;}
-    navigator.geolocation.getCurrentPosition(position=>{
-      const {latitude:lat,longitude:lng}=position.coords;
-      if(lat<27||lat>44.5||lng< -18.5||lng>5){toast('La ubicación parece estar fuera de España');return;}
-      chooseLocation({name:'Mi entorno',lat,lng});
-    },()=>toast('No se pudo acceder a tu ubicación. Comprueba los permisos.'),{timeout:9000,enableHighAccuracy:false,maximumAge:120000});
-  });
+  EL('myLocation').addEventListener('click',()=>locateUser(false));
 }
 function changeZoom(delta,anchor){
+  markLocationIntent();
   const old=state.zoom,next=clamp(old+delta,11,16);
   if(next===old)return;
   const px=anchor||{x:map.w/2,y:map.h/2};
@@ -457,7 +514,8 @@ function toggleCompare(){
   else{state.comparison.push(item);toast(state.comparison.length===2?'¡Dos zonas listas para comparar!':'Primera zona añadida a la comparación');}
   persist();renderDetails();renderComparePage();
 }
-function chooseLocation(place,zoom=14){
+function chooseLocation(place,zoom=14,automatic=false){
+  if(!automatic)markLocationIntent();
   const changingCity=state.city!==place.name;
   cancelRatingsRequest();
   state.city=place.name;state.center={lat:Number(place.lat),lng:Number(place.lng)};state.zoom=zoom;
@@ -519,6 +577,7 @@ async function refreshRealData(){
 function escapeHtml(str){return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 async function searchPlace(term){
   const query=term.trim();if(query.length<2){toast('Introduce al menos dos caracteres');return;}
+  markLocationIntent(); // Search begins before geocoding completes.
   // Quick city buttons use presets, but typed searches cover ALL Spain.
   const found=PRESETS[clean(query)];
   if(found){chooseLocation(found);return;}
@@ -547,6 +606,7 @@ function openPlaceResults(places){
   }));
 }
 function changeView(view){
+  if(view!=='explorar')markLocationIntent();
   if(view!=='explorar'&&state.view==='explorar'){
     cancelRatingsRequest();ratingsStatus();
   }
@@ -788,6 +848,7 @@ function bindUI(){
   document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>changeView(btn.dataset.view)));
   document.querySelectorAll('[data-city]').forEach(btn=>btn.addEventListener('click',()=>chooseLocation(PRESETS[clean(btn.dataset.city)])));
   EL('placeForm').addEventListener('submit',e=>{e.preventDefault();searchPlace(EL('placeSearch').value);});
+  EL('placeSearch').addEventListener('input',markLocationIntent);
   EL('howScoring').addEventListener('click',()=>changeView('metodologia'));
   EL('legendInfo').addEventListener('click',openLegend);
   EL('footerMethod').addEventListener('click',()=>changeView('metodologia'));
@@ -829,6 +890,7 @@ function start(){
   }
   state.selected=PREVIEW_MODE?previewRecords()[0]:cellAt(state.center.lat,state.center.lng);
   bindUI();initMap();renderDetails();renderCounters();scheduleMapRefresh();updateAccountButton();
+  if(!PREVIEW_MODE)locateUser(true);
   if(window.BarrioAPI?.configured)window.BarrioAPI.onCommunityAuthChange(async()=>{await updateAccountButton();if(EL('emailLoginForm')&&!EL('modalRoot').classList.contains('hidden')){try{const u=await window.BarrioAPI.getCommunityUser();if(u){closeModal();toast('Correo verificado. Ya puedes opinar.');}}catch{}}});
 }
 document.addEventListener('DOMContentLoaded',()=>{start();window.dispatchEvent(new Event('zonenta:app-ready'));});

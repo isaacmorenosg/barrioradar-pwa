@@ -21,5 +21,5 @@ test('After submitting, moderation and publication remain clearly explained',()=
  assert.match(app,/await window\.BarrioAPI\.sendReview/);
  assert.match(app,/Tu opinión está en revisión/);
  assert.match(app,/Se mostrará en el mapa en cuanto un moderador la apruebe/);
- assert.match(sw,/v45-mobile-legend-spacing/);
+ assert.match(sw,/v46-auto-geolocation/);
 });

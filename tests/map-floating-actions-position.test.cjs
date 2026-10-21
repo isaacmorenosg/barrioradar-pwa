@@ -10,7 +10,7 @@ test('Desktop floating map actions sit above the bottom attribution strip',()=>{
   assert.match(theme,/position:fixed;bottom:calc\(94px \+ env\(safe-area-inset-bottom\)\)/);
   assert.match(theme,/bottom:calc\(78px \+ env\(safe-area-inset-bottom\)\);min-height:40px/);
   assert.doesNotMatch(theme,/position:fixed;bottom:28px;z-index:22/);
-  assert.match(sw,/v45-mobile-legend-spacing/);
+  assert.match(sw,/v46-auto-geolocation/);
   // The baseline is absolute with left/right 0: don't constrain its width.
   assert.match(theme,/body\.map-view-active #viewExplorar \.map-baseline\{max-width:none\}/);
   assert.doesNotMatch(theme,/\.map-baseline\{max-width:calc\(100% - 22px\)\}/);
@@ -25,5 +25,5 @@ test('Mobile map legend is anchored above fixed buttons with viewport-safe spaci
   assert.match(theme,/\.map-baseline\{\s*position:fixed;\s*bottom:calc\(168px \+ env\(safe-area-inset-bottom\)\)/);
   assert.match(theme,/body\.map-view-active #mobileRateCTA,\s*body\.map-view-active #mobileSheetChip\{\s*bottom:calc\(88px \+ env\(safe-area-inset-bottom\)\)/);
   assert.match(theme,/orientation:landscape/);
-  assert.match(sw,/v45-mobile-legend-spacing/);
+  assert.match(sw,/v46-auto-geolocation/);
 });
