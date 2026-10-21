@@ -395,3 +395,37 @@ button[aria-busy="true"] .zonenta-spinner{color:inherit;width:14px;height:14px;f
   /* Landscape phones use Ver zona instead of a bulky on-map summary. */
   body.map-view-active #mobileSectorPreview:not([hidden]){display:none!important}
 }
+
+
+/* v45: on portrait phones, the map legend and buttons share a viewport anchor.
+   Keep legend/credits completely above the actions, including Android safe areas. */
+@media (max-width:760px) and (orientation:portrait){
+  body.map-view-active #viewExplorar .map-baseline{
+    position:fixed;
+    bottom:calc(168px + env(safe-area-inset-bottom));
+    left:11px;
+    right:auto;
+    width:max-content;
+    max-width:calc(100vw - 88px);
+    z-index:16;
+    box-sizing:border-box;
+  }
+  body.map-view-active #mobileRateCTA,
+  body.map-view-active #mobileSheetChip{
+    bottom:calc(88px + env(safe-area-inset-bottom));
+    z-index:17;
+  }
+}
+/* Keep the credit strip clear even on short landscape phones. */
+@media (max-width:760px) and (orientation:landscape){
+  body.map-view-active #viewExplorar .map-baseline{
+    position:fixed;
+    bottom:calc(168px + env(safe-area-inset-bottom));
+    left:11px;
+    right:auto;
+    width:max-content;
+    max-width:calc(100vw - 88px);
+    z-index:16;
+    box-sizing:border-box;
+  }
+}
