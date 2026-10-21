@@ -12,13 +12,14 @@
     const navAccount = $('mobileAccountButton');
     if (!sheet || !map || !showButton || !overlay) return;
     const mobile = window.matchMedia('(max-width:760px)');
+    const mapFirst = () => document.body.classList.contains('map-view-active');
     const isOpen = () => document.body.classList.contains('sheet-open');
     const setOpen = (open, focus) => {
-      const next = Boolean(open && mobile.matches);
+      const next = Boolean(open && (mobile.matches || mapFirst()));
       document.body.classList.toggle('sheet-open', next);
       showButton.setAttribute('aria-expanded', String(next));
       sheet.setAttribute('aria-hidden', String(!next && mobile.matches));
-      sheet.inert = !next && mobile.matches;
+      sheet.inert = !next && (mobile.matches || mapFirst());
       if (next) {
         const inner = $('detailsContent');
         if (inner) inner.scrollTop = 0;
@@ -26,7 +27,7 @@
       } else if (focus) showButton.focus({preventScroll:true});
     };
     const resetForSize = () => {
-      if (mobile.matches) setOpen(false,false);
+      if (mobile.matches || mapFirst()) setOpen(false,false);
       else {
         document.body.classList.remove('sheet-open');
         sheet.inert = false;
