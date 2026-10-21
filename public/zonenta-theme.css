@@ -328,3 +328,24 @@ button[aria-busy="true"] .zonenta-spinner{color:inherit;width:14px;height:14px;f
  body.map-view-active #viewExplorar>.search-section .quick-locations{display:none}
  body.map-view-active.sheet-open #viewExplorar .details-card{top:60px;bottom:8px}
 }
+
+/* Floating map actions on wide screens, without a permanent details sidebar. */
+@media (min-width:761px){
+ body.map-view-active #mobileRateCTA,body.map-view-active #mobileSheetChip{
+   display:inline-flex!important;position:fixed;bottom:28px;z-index:22;
+   min-height:46px;align-items:center;justify-content:center;gap:8px;
+   border-radius:999px;padding:0 19px;font-size:12px;font-weight:800;
+   box-shadow:0 8px 25px rgba(15,45,91,.2);
+ }
+ body.map-view-active #mobileRateCTA{right:155px;background:#CA451D;border:1px solid #CA451D;color:#fff}
+ body.map-view-active #mobileSheetChip{right:18px;background:#fff;border:1px solid #D8E3EF;color:#0F2D5B}
+ body.map-view-active #mobileRateCTA:disabled,body.map-view-active #mobileSheetChip:disabled{opacity:.55;cursor:not-allowed}
+ body.map-view-active #mobileRateCTA .icon,body.map-view-active #mobileSheetChip .icon{height:16px;width:16px}
+ body.map-view-active .sheet-open #mobileRateCTA{display:none}
+ body.map-view-active.sheet-open #mobileRateCTA,body.map-view-active.sheet-open #mobileSheetChip{visibility:hidden;pointer-events:none}
+ body.map-view-active #viewExplorar .details-card .sheet-grip{display:none}
+ body.map-view-active #viewExplorar .mobile-sector-preview:not([hidden]){top:12px}
+}
+@media (min-width:761px) and (max-height:600px){
+ body.map-view-active #mobileRateCTA,body.map-view-active #mobileSheetChip{bottom:12px;min-height:40px}
+}

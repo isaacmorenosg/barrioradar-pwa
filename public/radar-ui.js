@@ -18,7 +18,7 @@
       const next = Boolean(open && (mobile.matches || mapFirst()));
       document.body.classList.toggle('sheet-open', next);
       showButton.setAttribute('aria-expanded', String(next));
-      sheet.setAttribute('aria-hidden', String(!next && mobile.matches));
+      sheet.setAttribute('aria-hidden', String(!next && (mobile.matches || mapFirst())));
       sheet.inert = !next && (mobile.matches || mapFirst());
       if (next) {
         const inner = $('detailsContent');
